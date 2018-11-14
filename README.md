@@ -1,6 +1,6 @@
 # TranscriptionTool-Plugin
 
-## Database table format
+## Database tables format
 ### Transcription rules
 
 Necessary columns:
@@ -15,5 +15,5 @@ Necessary columns:
 - **Group**: varchar. The rules are sorted alphabetically by this value, if it is empty by the column **Beta**
 - **Description**: varchar
 - **Comment**: varchar
-- **Depiction**: varchar. Unicode representation of the example (for diacritics) or character (all others). If this field is empty a png image from the images sub-folder with name <Beta>.png is used
+- **Depiction**: varchar. Unicode representation of the example (for diacritics) or character (all others). If this field is empty a png image from the images sub-folder with name \<Beta\>.png is used
   
