@@ -16,4 +16,10 @@ Necessary columns:
 - **Description**: varchar
 - **Comment**: varchar
 - **Depiction**: varchar. Unicode representation of the example (for diacritics) or character (all others). If this field is empty a png image from the images sub-folder with name \<Beta\>.png is used
+
+### Codepage Original
+
+Necessary columns:
   
+- **Beta**: varchar
+- **Original**: varchar
