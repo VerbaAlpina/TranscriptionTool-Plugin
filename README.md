@@ -10,8 +10,8 @@ Necessary columns:
   - Diakritics: \[^a-z1-7\]\[1-7\]? (Preferably special characters from the ASCII range)
   - Special characters: No specific rules, except no collision with values from the first two types allowed
   - Blanks: No specific rules, except no collision with values from the first two types allowed
-- **Beta_Example**: Not relevant for base signs. Gives an exemplary combination of this diactric/character and other characters
-- **Position**: enum('n/a', 'above', 'below', 'direct', 'after') Only relevant for diacritics. Describes the position of the diacritic in relation to the base sign. (direct is used for typographic variations of the base sign)
+- **Beta_Example**: Not relevant for base characters. Gives an exemplary combination of this diactric/character and other characters
+- **Position**: enum('n/a', 'above', 'below', 'direct', 'after') Only relevant for diacritics. Describes the position of the diacritic in relation to the base character. (direct is used for typographic variations of the base character)
 - **Sort_Order**: varchar. The rules are sorted alphabetically by this value, if it is empty by the column **Beta**
 - **Description**: varchar
 - **Comment**: varchar
