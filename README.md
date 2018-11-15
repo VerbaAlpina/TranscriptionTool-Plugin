@@ -41,7 +41,7 @@ Necessary columns:
 
 - **Id_Informant**: unsigned primary key auto-increment
 - **Source**: varchar
-- **Number** varchar
+- **Informant_Number** varchar
 - **Place_Name** varchar
 
 ### Attestations
