@@ -30,8 +30,8 @@ Necessary columns:
 
 - **Id_Stimulus**: unsigned primary key auto-increment
 - **Source**: varchar
-- **Map_Number** unsigned
-- **Sub_Number** unsigned
+- **Map_Number** varchar
+- **Sub_Number** varchar
 - **Stimulus** varchar
 
 
@@ -41,7 +41,7 @@ Necessary columns:
 
 - **Id_Informant**: unsigned primary key auto-increment
 - **Source**: varchar
-- **Number** unsigned
+- **Number** varchar
 - **Place_Name** varchar
 
 ### Attestations
