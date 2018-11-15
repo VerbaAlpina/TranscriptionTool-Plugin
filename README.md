@@ -43,6 +43,7 @@ Necessary columns:
 - **Source**: varchar
 - **Informant_Number** varchar
 - **Place_Name** varchar
+- **Position** unsigned. Used for sorting
 
 ### Attestations
 
