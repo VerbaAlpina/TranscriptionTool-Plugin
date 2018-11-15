@@ -24,6 +24,18 @@ Necessary columns:
 - **Beta**: varchar
 - **Original**: varchar
 
+### Attestations
+
+Necessary columns:
+
+- **Id_Attestation** unsigned primary key auto-increment
+- **Id_Stimulus** foreign key to stimulus table
+- **Id_Informant** foreign key to informant table
+- **Attestation** varchar
+- **Transcribed_By** varchar
+- **Created** timestamp
+- **Classification** enum('A', 'P', 'M')
+- **Tokenized** boolean
 
 ### Codepage IPA (needed for tokenization)
 
