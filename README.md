@@ -27,7 +27,7 @@ Necessary columns:
 
 ### Codepage IPA
 
-Contains a mapping from characters in beta code (in general base character + diacritics) to their IPA equivalent. Accents are treated separatly by the conversion routine, so the combinations must not contain any accent diacritics. These are listed separatly (only the accent diactric itself) and marked as "Accent". Regular space characters and all other character that separate two tokens have to be marked as "Blank". All latin letter characters that are vowels have to be marked as "Vowel". All other characters are marked by the generic "Character". (Only the first beta letter is used to define if a character is a vowel or not, so combination of latin letters and numbers or diacritics do not need to be marked as "Vowel".)
+Contains a mapping from characters in beta code (in general base character + diacritics) to their IPA equivalent. Accents are treated separatly by the conversion routine, so the combinations must not contain any accent diacritics. These are listed separatly (only the accent diactric itself) and marked as "Accent". Regular space characters and all other character that separate two tokens have to be marked as "Blank". All latin letter characters that are vowels have to be marked as "Vowel". All other characters should be marked by the generic "Character". (Only the first beta letter is used to define if a character is a vowel or not, so combination of latin letters and numbers or diacritics do not need to be marked as "Vowel".)
 
 Necessary columns:
   
