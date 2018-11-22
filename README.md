@@ -63,6 +63,13 @@ Necessary columns:
 - **Id_Attestation**: foreign key to attestation table
 - **Id_Concept**: unsigned (should be foreign key to concept table)
 
+### Locks
+
+- **Table**: varchar
+- **Value**: varchar
+- **Locked_By**: varchar
+- **Time**: timestamp
+
 ### Codepage IPA (needed for tokenization)
 
 Contains a mapping from characters in beta code (in general base character + diacritics) to their IPA equivalent. Accents are treated separatly by the conversion routine, so the combinations must not contain any accent diacritics. These are listed separatly (only the accent diactric itself) and marked as "Accent". Regular space characters and all other character that separate two tokens have to be marked as "Blank". All latin letter characters that are vowels have to be marked as "Vowel". All other characters should be marked by the generic type "Character". (Only the first letter is used to define if a character is a vowel or not, so combination of latin letters and numbers or diacritics do not need to be marked as "Vowel".)
