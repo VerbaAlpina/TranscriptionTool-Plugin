@@ -65,7 +65,7 @@ Necessary columns:
 
 ### Locks
 
-- **Table**: varchar
+- **Table_Name**: varchar
 - **Value**: varchar
 - **Locked_By**: varchar
 - **Time**: timestamp
