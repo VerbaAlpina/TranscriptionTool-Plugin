@@ -45,7 +45,7 @@ Necessary columns:
 - **Place_Name** varchar
 - **Position** unsigned. Used for sorting
 
-### attestations (default name: attestations)
+### Attestations (default name: attestations)
 
 Necessary columns:
 
