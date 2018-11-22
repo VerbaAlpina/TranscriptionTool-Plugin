@@ -1,7 +1,7 @@
 # TranscriptionTool-Plugin
 
 ## Database tables format
-### Transcription rules
+### Transcription rules (default name: transcription_rules)
 
 Necessary columns:
 - **Kind**: enum('Base', 'Diacritic', 'Special', 'Blank')
@@ -17,14 +17,14 @@ Necessary columns:
 - **Comment**: varchar
 - **Depiction**: varchar. Unicode representation of the example (for diacritics) or character (all others). If this field is empty a png image from the images sub-folder with name \<Beta\>.png is used
 
-### Codepage Original
+### Codepage Original (default name: codepage_original)
 
 Necessary columns:
   
 - **Beta**: varchar
 - **Original**: varchar
 
-### Stimuli
+### Stimuli (default name: stimuli)
 
 Necessary columns:
 
@@ -35,7 +35,7 @@ Necessary columns:
 - **Stimulus** varchar
 
 
-### Informants
+### Informants (default name: informants)
 
 Necessary columns:
 
@@ -45,7 +45,7 @@ Necessary columns:
 - **Place_Name** varchar
 - **Position** unsigned. Used for sorting
 
-### Attestations
+### attestations (default name: attestations)
 
 Necessary columns:
 
@@ -58,19 +58,19 @@ Necessary columns:
 - **Classification**: enum('A', 'P', 'M')
 - **Tokenized**: boolean
 
-### Relationship Attestations <-> Concepts
+### Relationship Attestations <-> Concepts (default name: c_attestattion_concept)
 
 - **Id_Attestation**: foreign key to attestation table
 - **Id_Concept**: unsigned (should be foreign key to concept table)
 
-### Locks
+### Locks (default name: locks)
 
 - **Table_Name**: varchar
 - **Value**: varchar
 - **Locked_By**: varchar
 - **Time**: timestamp
 
-### Codepage IPA (needed for tokenization)
+### Codepage IPA (needed for tokenization) (default name: codepage_ipa)
 
 Contains a mapping from characters in beta code (in general base character + diacritics) to their IPA equivalent. Accents are treated separatly by the conversion routine, so the combinations must not contain any accent diacritics. These are listed separatly (only the accent diactric itself) and marked as "Accent". Regular space characters and all other character that separate two tokens have to be marked as "Blank". All latin letter characters that are vowels have to be marked as "Vowel". All other characters should be marked by the generic type "Character". (Only the first letter is used to define if a character is a vowel or not, so combination of latin letters and numbers or diacritics do not need to be marked as "Vowel".)
 
