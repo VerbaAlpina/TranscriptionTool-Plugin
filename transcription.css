@@ -1,0 +1,132 @@
+body {
+	color: black;
+}
+
+#iframeScanDiv {
+	padding:0px;
+	margin:0px;
+	border:0px;
+	border-right: 1px solid black;
+	width: calc(70% - 1px);
+	float:left;
+	overflow:auto;
+}
+#iframeCodepageDiv {
+  background-color:#ffffff;
+	padding:0px;
+	margin:0px;
+	border:0px;
+	width:30%;
+	float:right;
+	overflow:auto;
+	height: 300px;
+}
+
+#iframeCodepageDiv table, #iframeCodepageDiv tr, #iframeCodepageDiv td, #iframeCodepageDiv th{
+	border: black 1px solid;
+}
+
+#enterTranscription {
+  	background-color:#dddddd;
+	padding:0px;
+	margin:0px;
+	border:0px;
+	height:200pt;
+	width:100%;
+	bottom:0;
+	overflow:auto;
+	clear:both;
+}
+
+iframe {
+	width: 100%;
+	height: 100%;
+	border: none;
+	display: block;
+}
+
+#wpbody-content {
+	padding: 0 !important;
+}
+
+#wpfooter {
+	display: none !important;
+}
+
+#wpcontent {
+	padding: 0 !important;
+}
+
+#mapSelectionDiv {
+	display : none
+}
+
+#mapSelection {
+	max-width:30%;
+}
+
+.hidden_c {
+	visibility:hidden;
+}
+
+.hidden_coll {
+	visibility:collapse;
+}
+
+#informant_info {
+	padding: 5px;
+}
+
+.informant_details {
+	margin:5px;
+}
+
+.informant_fields {
+	background-color: #AFEEEE; 
+	font-weight:bold; 
+	padding:5px;
+}
+
+#inputTable {
+	vertical-align: middle;
+	width: calc(100vw - 50px);
+	table-layout: fixed;
+	margin-left : 1px;
+	margin-right: 1px;
+	padding-left: 5px;
+	padding-right: 5px;
+	border : 1px;
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+	color : black !important;
+}
+
+.previewStatement {
+	font-family : arial unicode;
+	font-size: 30px;
+}
+
+td.imageTranscriptionRule {
+	font-family : arial unicode;
+	font-size: 300%;
+	font-weight: bold;
+	line-height: 1em;
+	padding-bottom: 5px;
+	cursor: pointer;
+} 
+
+td.imageTranscriptionRule div {
+	display: table;
+	margin: auto;
+}
+
+td.imageTranscriptionRule img {
+	height: 1em;
+}
+
+table.ruleTable {
+	width: 95%;
+	margin-left: auto;
+	margin-right: auto;
+}

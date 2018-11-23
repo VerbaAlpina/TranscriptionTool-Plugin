@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+
+<head>
+<meta charset="UTF-8" />
+</head>
+
+<style type="text/css">
+body {
+	background: white;
+}
+
+div#content {
+	max-width: 800px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+div#iframeCodepageDiv div#content {
+	margin: 10px;
+}
+
+.rulesTable {
+	border: 1px solid black;
+	border-collapse: collapse;
+	margin-top: 20px;
+	margin-bottom: 20px;
+}
+.rulesTable thead tr {
+	border-bottom: 1px solid black;
+}
+
+.rulesTable th, .rulesTable td {
+	border-right: 1px solid black;
+	padding: 5px;
+}
+</style>
+
+<div id="content">
+<h1 style="text-align: center">Transkriptionsregeln</h1>
+
+Wir unterscheiden zwischen Basiszeichen und Diakritika.
+
+<br />
+<br />
+
+Basiszeichen befinden sich auf der Grundlinie. Alle Zeichen, die sich nicht auf der Grundlinie befinden, werden als Diakritika betrachtet. Als Diakritika im weiteren Sinne werden auch rein typographische Variationen eines Basiszeichens behandelt, z.B. wenn das Basiszeichen kleiner dargestellt wird als die anderen.
+
+<h2>Basiszeichen</h2>
+
+Basiszeichen, die in der ASCII-Tabelle vorhanden sind, werden beibehalten (= alle lateinischen Buchstaben; <b>nicht</b> deutsche Umlaute!). Alle anderen Basiszeichen werden durch eine Kombination von einem Buchstaben und einer Ziffer transkribiert (siehe Tabelle).
+
+
+<h2>Diakritika</h2>
+
+Diakritika werden grundsätzlich hinter das Basiszeichen gesetzt, dem sie zugeordnet sind. Bei mehreren Diakritika auf einem Basiszeichen muss die folgende Reihenfolge eingehalten werden. 
+
+<ul style="list-style: circle; margin-left: 20px;">
+	<li>
+	Zunächst werden Diakritika notiert, die eine typographische Variation eines Basiszeichens markieren, z.B. wenn das Basiszeichen höher oder tiefer gesetzt wird. Diese Diakritika werden in der Tabelle gelb dargestellt.
+	</li>
+	<li>
+	Danach folgen Diakritika unter und über dem Basiszeichen in der Reihenfolge von unten nach oben. Insbesondere müssen die Diakritika unter einem Basiszeichen (grün markiert) immer vor denen über einem Basiszeichen (blau markiert) kommen.
+	</li>
+	<li>
+	Als letztes werden Diakritika notiert, die nach dem Basiszeichen kommen, z.B. ein Längenzeichen oder ein Apostroph nach einem Basiszeichen. Diese sind in der Tabelle orange markiert.
+	</li>
+</ul>
+
+Jedes Zeichen, das für die Transkription eines Diakritikums verwendet wird, darf pro Basiszeichen nur einmal vorkommen. Für die Wiederholung des selben Diakritikums gibt es eigene Regeln, z.B. <b>:</b> für zwei Punkte über einem Basiszeichen oder <b>\2</b> für einen doppelten Gravis.
+
+<br /><br />
+
+Wenn sich ein Diakritikum auf zwei Zeichen bezieht z.B. a͠e werden die Basiszeichen in eckige Klammern gesetzt, in diesem Fall [ae]~.
+
+
+<h2 id="kommentare">Klammern und Kommentare</h2>
+Kommentare (ob eingeklammert oder nicht) werden <b>nach</b> dem Beleg, auf den sich sich beziehen, in spitze Klammern gesetzt, z.B: (m.) &rarr; &lt;m.&gt;. Wenn der gesamte Beleg eingeklammert ist, wird der Beleg ohne Klammern transkribiert und in spitzen Klammern die Bemerkung "eingeklammert" hinzugefügt.
+
+<h2>Trennzeichen</h2>
+
+Eventuelle morphosyntaktische Varianten eines Belegs wie z.B. Singular- und Pluralformen werden durch Kommata, verschiedene Wortformen durch Semikola getrennt. Dies entspricht der Darstellung der Belege im Atlas AIS. Wenn in der Quelle die Belege durch andere Trennzeichen (z.B. / oder -) getrennt sind, müssen diese in der Transkription entsprechend durch Kommata und Semikola ersetzt werden. Eventuelle Nummerierungen von verschiedenen Varianten werden weggelassen.
+
+<h2>Typisierte Belege</h2>
+
+Wenn die Quelle für einen Informanten sowohl einen Einzelbeleg als auch eine bereits typisierte Variante enthält, wird nur der Einzelbeleg transkribiert. Nur falls dies nicht möglich ist, wird die typisierte Variante transkribiert und über das entsprechende Auswahlmenü als "phon. Typ" bzw. "morph. Typ" markiert. Im Gegensatz zu Einzelbelegen sind bei Typen auch Großbuchstaben erlaubt, sonst gelten die selben Regeln für die Transkription.
+
+<br /><br />
+
+Wenn für einen Informanten Einzelbelege und typisierte Belege gemischt vorkommen, müssen für die Transkription zwei verschiedene Zeilen angelegt werden, in denen die Transkripte entsprechend als Typ bzw. Beleg markiert werden.
+
+<h2>Sonderzeichen in der Quelle</h2>
+
+Alle Zeichen, die in der Transkription als Diakritika verwendet werden (inklusive Ziffern) müssen, wenn sie als Originalzeichen vorkommen durch die Voranstellung von <b>zwei</b> Backslashes maskiert werden, z.B. * &rarr; \\*. Dies bezieht sich aber nur auf Zeichen, die in der Quelle Teil der phonetischen Transkription des Einzelbelegs sind. Bei Zeichen, die eine bestimmte Bedeutung haben, muss diese Bedeutung stattdessen als Bemerkung in spitzen Klammern hinter den Beleg geschrieben werden. Zum Beispiel steht das Zeichen † im AIS für eine veraltete Form und muss in der Transkription mit &lt;veraltet&gt; notiert werden. Klammern werden immer ersetzt (siehe <a href="#kommentare">Klammern und Kommentare</a> und <a href="#platzhalter">Platzhalter</a>).
+
+<br />
+
+Folgende Zeichen aus dem AIS können einfach weggelassen werden: ℗, ○, P, S, +
+
+<h2 id="platzhalter">Platzhalter</h2>
+
+Alle Formen von Platzhaltern oder verkürzten Schreibweisen müssen durch die Zeichenfolge ersetzt werden, für die sie stehen. Wenn ein Beleg mit Kommentaren in mehrere Belege aufgeteilt wird, müssen diese wiederholt werden. Die folgende Tabelle enthält einige Beispiele:
+
+<table class="rulesTable">
+	<thead>
+		<tr><th>Beleg Quelle</th><th>Transkription</th></tr>
+	</thead>
+	<tbody>
+		<tr><td>u kā́ni; i ~</td><td>u ka-/ni; i ka-/ni</td></tr>
+		<tr><td>(Alm)hütte</td><td>Almhu:tte; Hu:tte</td></tr>
+		<tr><td>(um bé̜l) pašọ́ɳ (selten)</td><td>um be(/l pas^o?/n1 &lt;selten&gt;; pas^o?/n1 &lt;selten&gt;</td></tr>
+	</tbody>
+</table>
+
+Eine Ausnahme gibt es bei kleinen phonetischen Variationen bei bereits typisierten Belegen, so kann z.B. der morpho-lexikalische Typ "Sänn(e)hütte" als "Sa:nn\\(e\\)hu:tte" transkribiert werden.
+
+
+<h2>Transkription nicht möglich</h2>
+
+Bei Informanten, für die in einer Karte <b>keine</b> Daten eingetragen sind, wird der "vacat"-Button verwendet. Falls die Transkription eines Beleges problematisch ist (z.B. weil sie anhand dieser Regeln nicht möglich oder unklar ist), wird der "Problem"-Button verwendet.
+
+<h2>Vorschau bei der Transkription</h2>
+
+Beim Eingeben der Transkription wird zu Vergleichszwecken hinter dem jeweiligen Textfeld eine Vorschau angezeigt, wie der Beleg nach der Rückkonvertierung aussieht. Falls der Text "Nicht gültig" erscheint, ist der Beleg falsch transkribiert und kann so nicht eingetragen werden. Falls einzelne Zeichen rot markiert im Beta-Code erscheinen, bedeutet das, dass der Beleg zwar gültig ist, aber das Zeichen (momentan) noch nicht konvertiert werden kann. Das tritt hauptsächlich bei Zeichen auf, die in dieser Form noch nicht vorgekommen sind. Der Beleg kann in diesem Fall ganz normal eingetragen werden.
+
+</div>

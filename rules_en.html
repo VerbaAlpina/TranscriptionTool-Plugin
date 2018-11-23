@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+
+<head>
+<meta charset="UTF-8" />
+</head>
+
+<style type="text/css">
+body {
+	background: white;
+}
+
+div#content {
+	max-width: 800px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+div#iframeCodepageDiv div#content {
+	margin: 10px;
+}
+
+.rulesTable {
+	border: 1px solid black;
+	border-collapse: collapse;
+	margin-top: 20px;
+	margin-bottom: 20px;
+}
+.rulesTable thead tr {
+	border-bottom: 1px solid black;
+}
+
+.rulesTable th, .rulesTable td {
+	border-right: 1px solid black;
+	padding: 5px;
+}
+</style>
+
+<div id="content">
+<h1 style="text-align: center">Transcription rules</h1>
+
+We distinguish between base characters and diacritics. 
+
+<br />
+<br />
+
+Base characters are located on the baseline. All characters that are not on the baseline are considered diacritics. Purely typographic variations of a base character are also treated as diacritics in the broader sense, e.g. if the base character is displayed smaller than the others.
+
+
+<h2>Base characters</h2>
+
+Base characters that exist in the ASCII table are retained (= all Latin characters; not German umlauts!). All other base characters are transcribed by a combination of a letter and a numeral (see table).
+
+
+<h2>Diacritics</h2>
+Diacritics are always placed after the base character to which they are assigned. If there are several diacritics on one base character, the following sequence must be observed: 
+
+<ul style="list-style: circle; margin-left: 20px;">
+	<li>
+	First, diacritics that mark a typographic variation of a base character are written, e.g. if the base character is set higher or lower. These diacritics are shown in yellow in the table.
+	</li>
+	<li>
+	Then diacritics below and above the base character are written down from bottom to top. In particular, the diacritics below a base character (marked in green) must always come before those above a base character (marked in blue).
+	</li>
+	<li>
+	At last diacritics which come after the base character are written, e.g. a length sign or an apostrophe after a base character. These are marked in orange in the table.
+	</li>
+</ul>
+	
+Each character used for the transcription of a diacritic may only occur once per base character. There are special rules for the repetition of the same diacritic, e.g. <b>:</b> for two points above a base character or <b>\2</b> for a double grave accent.
+
+<br /><br />
+
+If a diacritic refers to two characters, e.g. a͠e, the base characters are placed in square brackets, in this case [ae]~.
+
+<h2 id="kommentare">Brackets and Comments</h2>
+
+Comments (whether in brackets or not) are placed in angle brackets after the attestation to which they refer, e.g: (m.) &rarr; &lt;m.&gt;. If the entire attestation is bracketed, the attestation is transcribed without brackets and the remark "in brackets" is added in angle brackets.
+
+
+<h2>Separators</h2>
+
+Possible morphosyntactic variants of an attestation such as singular and plural forms are separated by commas, different word forms are separated by semicolons. This corresponds to the representation of the attestations in the atlas AIS. If the attestations are separated by other separators (e.g. / or -) in the source, these must be replaced accordingly by commas and semicolons in the transcription. Any numbering of different variants is omitted.
+
+<h2>Typified attestations</h2>
+
+If the source contains both a single attestation and an already typified variant for an informant, only the single attestation is transcribed. Only if this is not possible, the typified variant will be transcribed and will be marked as "phonetic type" or "morpho-lexical type" via the corresponding selection menu. In contrast to single attestations, for types also capital letters are allowed, otherwise the same rules apply for transcription. 
+
+<br /><br />
+
+If there exist single attestations as well as typified attestations for an informant, two different lines must be created for the transcription, in which the transcripts are marked accordingly as type or as attestation.
+
+<h2>Special characters in the source</h2>
+
+All characters used as diacritics in the transcription (including numerals), must be masked by prefixing them with <b>two</b> backslashes, e.g. * &rarr; \\*, if they appear as original characters. This only applies to characters that are part of the phonetic transcription of the single attestation in the source. For characters that have a certain meaning, this meaning must instead be written as a remark in angle brackets behind the attestation. For example, the character † stands for an obsolete form in the AIS and must be marked with < obsolete> in the transcription. Brackets are always replaced (see <a href="#kommentare">brackets and comments</a> and <a href="#platzhalter">placeholders</a>). 
+
+<br />
+
+The following characters from the AIS can simply be omitted: ℗, ○, P, S, +
+
+<h2 id="platzhalter">Placeholders</h2>
+
+All forms of placeholders or shortened spellings must be replaced by the character string they represent. If an attestation with comments is split into multiple attestations, these must be repeated. The following table gives some examples:
+
+<table class="rulesTable">
+	<thead>
+		<tr><th>Attestation from the source</th><th>Transcription</th></tr>
+	</thead>
+	<tbody>
+		<tr><td>u kā́ni; i ~</td><td>u ka-/ni; i ka-/ni</td></tr>
+		<tr><td>(Alm)hütte</td><td>Almhu:tte; Hu:tte</td></tr>
+		<tr><td>(um bé̜l) pašọ́ɳ (selten)</td><td>um be(/l pas^o?/n1 &lt;selten&gt;; pas^o?/n1 &lt;selten&gt;</td></tr>
+	</tbody>
+</table>
+
+
+There is an exception for small phonetic variations in already typified attestations, e.g. the morpho-lexical type "Sänn(e)hütte" can be transcribed as "Sa:nn\\(e\\)hu:tte".
+
+
+<h2>Transcription not possible</h2>
+
+The "vacat" button is used for informants for whom <b>no</b> data is entered in a map. If the transcription of an attestation is problematic (e.g. because it is not possible or unclear according to these rules), the "problem" button is used.
+
+
+<h2>Transcription preview</h2>
+
+When you enter the transcription, a preview of how the attestation will look after the reconversion is displayed behind the corresponding text field for comparison purposes. If the text "Not valid" appears, the attestation is transcribed incorrectly and cannot be entered. If individual characters appear highlighted in red in the beta code, this means that the attestation is valid, but the character cannot yet be converted. This is mainly the case with characters that have not yet occurred in this form. In this case, the attestation can be entered as usual.
+
+</div>
