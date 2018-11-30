@@ -129,6 +129,19 @@ jQuery(function (){
     jQuery(window).on('unload', function(){
     	removeTTLock (true);
     });
+    
+    if (URLData["atlas"]){
+    	jQuery("#atlasSelection").val(URLData["atlas"]).trigger("change");
+//    	
+//    	if (URLData["stimulus"]){
+//    		jQuery("#mapSelection option").each(function (){
+//    			if (jQuery(this).)
+//    		});
+//    		
+//    		
+//    		jQuery("#mapSelection").val(URLData["stimulus"]).trigger("change");
+//    	}
+    }
 });
 
 function removeTTLock (pageClosed, callback){

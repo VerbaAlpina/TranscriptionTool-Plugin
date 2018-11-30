@@ -15,7 +15,7 @@
 class TranscriptionTool {
 	
 	private static $db;
-	private static $document_url;
+	private static $document_path;
 	
 	private static $required_tables = ['transcription_rules', 'codepage_original', 'attestations', 'stimuli', 'informants', 'c_attestation_concept', 'locks'];
 	private static $mappings;
@@ -57,7 +57,7 @@ class TranscriptionTool {
 		load_plugin_textdomain( 'tt', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 	}
 	
-	static function init ($document_base_url, &$db, $sources, $concepts, $mappings = NULL){
+	static function init ($document_path, &$db, $sources, $concepts, $mappings = NULL){
 		if (!$db){
 			global $wpdb;
 			self::$db = &$wpdb;
@@ -66,7 +66,7 @@ class TranscriptionTool {
 			self::$db = &$db;
 		}
 
-		self::$document_url = $document_base_url;
+		self::$document_path = $document_path;
 		self::$sources = $sources;
 		self::$concepts = $concepts;
 
@@ -170,7 +170,7 @@ class TranscriptionTool {
 			$char_assoc[$char[0]] = $char[1];
 		}
 		wp_localize_script('tt_script', 'Codepage', $char_assoc);
-		wp_localize_script('tt_script', 'url', self::$document_url);
+		wp_localize_script('tt_script', 'url', home_url(self::$document_path));
 		
 		$rulesFile = 'rules_en.html';
 		$lang = substr(get_user_locale(), 0, 2);
@@ -179,6 +179,22 @@ class TranscriptionTool {
 		}
 		
 		wp_localize_script('tt_script', 'Rules_File', $folder . $rulesFile);
+		
+		$url_data = [];
+		
+		if (isset($_REQUEST['stimulus'])){
+			$url_data['stimulus'] = $_REQUEST['stimulus'];
+			$url_data['atlas'] = self::$db->get_var(self::create_query('SELECT s.#Source# FROM #stimuli# s WHERE s.#Id_Stimulus# = %d', [$_REQUEST['stimulus']]));
+		}
+		else if  (isset($_REQUEST['atlas'])){
+			$url_data['atlas'] = $_REQUEST['atlas'];
+		}
+		
+		if (isset($_REQUEST['informant'])){
+			$url_data['informant'] = $_REQUEST['informant'];
+		}
+		
+		wp_localize_script('tt_script', 'URLData', $url_data);
 		
 		?>
 
@@ -737,7 +753,7 @@ class TranscriptionTool {
 	private static function list_scan_dir($atlas) {
 
 		$atlas = remove_accents($atlas);
-		$scan_dir = get_home_path() . 'dokumente/scans/' . $atlas . '/';
+		$scan_dir = get_home_path() . self::$document_path . $atlas . '/';
 		
 		if ($handle = opendir($scan_dir)) {
 			while (false !== ($file = readdir($handle))) {
