@@ -136,6 +136,27 @@ class BetaParser {
 		return false;
 	}
 	
+	public function beta_from_unicode_character ($unicode){
+		
+		if (ctype_alpha($unicode))
+			return $unicode;
+		
+		$upper = false;
+		
+		if (ctype_upper($unicode)){
+			$unicode = strtolower($unicode);
+			$upper = true;
+		}
+		
+		$original = $this->db->get_var($this->db->prepare('SELECT Beta FROM ' . $this->orig_table . ' WHERE Original COLLATE utf8mb4_bin = %s', $unicode));
+		
+		if ($upper){
+			$original = strtoupper($original);
+		}
+		
+		return $original;
+	}
+	
 	public function convert_to_original ($input, $option = NULL){
 		if(!$this->va_beta){
 			return ['string' => false, 'output' => [['error', 'Not VA beta code']]];

@@ -111,6 +111,14 @@ class TranscriptionTool {
 
 	static function echo_content () {
 		
+		if (isset($_REQUEST['onlytable']) && $_REQUEST['onlytable']){
+			wp_enqueue_style('tt_style', plugins_url('', __FILE__) . '/transcription.css');
+			echo '<div id="iframeCodepageDiv" style="width: 100%; height: 100%;">';
+			self::print_rule_table();
+			echo '</div>';
+			return;
+		}
+		
 		if (!self::$initialized){
 			echo 'Not initialized!';
 			return;
@@ -123,14 +131,6 @@ class TranscriptionTool {
 		$helpScans = __('If the stimulius is marked green the corresponding scan exists, if it is marked red the scan is missing.', 'tt');
 		
 		$folder = plugins_url('', __FILE__) . '/';
-		
-		$select_sql = 'SELECT t.#Beta#A#, t.#Beta_Example#A#, t.#Position#A#, t.#Description#A#, t.#Comment#A#, t.#Depiction#A# FROM #transcription_rules# t ';
-		
-		$tmapping = self::$mappings['transcription_rules'];
-		$base_chars = self::$db->get_results(self::create_query($select_sql . "WHERE t.#Kind# = '" . $tmapping->get_enum_value('Kind', 'Base')  .  "' ORDER BY t.#Sort_Order# ASC, t.#Beta# ASC"), ARRAY_A);
-		$diacritics = self::$db->get_results(self::create_query($select_sql . "WHERE t.#Kind# = '" . $tmapping->get_enum_value('Kind', 'Diacritic')  .  "' ORDER BY t.#Sort_Order# ASC, t.#Beta# ASC"), ARRAY_A);
-		$special_chars = self::$db->get_results(self::create_query($select_sql . "WHERE t.#Kind# = '" . $tmapping->get_enum_value('Kind', 'Special')  .  "' ORDER BY t.#Sort_Order# ASC, t.#Beta# ASC"), ARRAY_A);
-		$spaces = self::$db->get_results(self::create_query($select_sql . "WHERE t.#Kind# = '" . $tmapping->get_enum_value('Kind', 'Blank')  .  "' ORDER BY t.#Sort_Order# ASC, t.#Beta# ASC"), ARRAY_A);
 		
 		wp_enqueue_script('tt_script', $folder . 'transcription.js', [], false, true);
 		wp_enqueue_style('tt_style', $folder . 'transcription.css');
@@ -203,7 +203,121 @@ class TranscriptionTool {
 		</div>
 		<div id="iframeCodepageDiv">
 			
-			<h1 style="text-align: center;"><?php _e('Base characters', 'tt');?></h1>
+			<?php self::print_rule_table(); ?>
+			
+			<br />
+			<br />
+			<br />
+			<br />
+			
+			<?php 
+			echo file_get_contents(dirname(__FILE__) . '/' . $rulesFile);
+			?>
+		</div>
+		<div id="enterTranscription">
+		<?php
+		?>
+			<select id="atlasSelection">
+				<option value="-1"><?php _e('Choose atlas', 'tt');?></option>
+				<?php
+				foreach(self::$sources as $source){
+					echo "<option value='$source'>$source</option>";
+				}
+				?>
+			</select>
+			
+			<div id="mapSelectionDiv">
+				<select id="mapSelection">
+				</select>
+				<?php echo self::info_symbol($helpScans);?>
+			</div>
+			
+			<div id="informant_info" class="hidden_c" style="display: inline;">
+				<span class="informant_fields"></span> - <?php _e('Informant no.', 'tt');?>
+				<span class="informant_fields"></span>
+			</div>
+		
+			<div style="float:right; display:inline;">
+				 <input id="region" placeholder="<?php _e('Informant number(s)', 'tt');?>" style="background-color : #ffffff; display : inline;" />
+				 <img  style="vertical-align: middle;" src="<?php echo VA_PLUGIN_URL . '/images/Help.png';?>" id="helpIconInformants" class="helpIcon" />
+			</div>
+			
+			<div style="float:right; display:inline;">
+				<select id="mode" style="background-color:#ffffff;">
+					<option value="first"><?php _e('Initial recording', 'tt');?></option>
+					<option value="correct"><?php _e('Correction', 'tt');?></option>
+					<option value="problems"><?php _e('Problems', 'tt');?> </option>
+				</select>
+				<img  style="vertical-align: middle;" src="<?php echo VA_PLUGIN_URL . '/images/Help.png';?>" id="helpIconMode" class="helpIcon" />
+			</div>
+				
+			<div class="hidden_coll" id="error"></div>
+				
+			<div class="informant_details hidden_c" id="input_fields">
+				<h3 style="display: inline"><?php _e('Transcription', 'tt');?></h3>
+				<a href="#" id="addRow" style="display: inline">(<?php _e('+ Add row', 'tt'); ?>)</a>
+				
+				<table id="inputTable"></table>
+			
+				<br />
+				
+				<input type="button" value="<?php _e('Insert', 'tt');?>" id="insertAttestation"<?php if (!current_user_can(self::$cap_write)) echo ' disabled'; ?> />
+				
+				<input type="button" value="vacat" id="insertVacat"<?php if (!current_user_can(self::$cap_write)) echo ' disabled'; ?> />
+				<?php echo self::info_symbol($helpVacat);?>
+				
+				<input type="button" value="<?php _e('Problem', 'tt');?>" id="insertProblem"<?php if (!current_user_can(self::$cap_write)) echo ' disabled'; ?> />
+				<?php echo self::info_symbol($helpProblem);?>
+			
+				<input type="button" id="addConcept" value="<?php _e('Create new concept', 'tt');?>" style="float: right"<?php if (!current_user_can(self::$cap_write)) echo ' disabled'; ?> />
+			</div>
+
+			<div id="helpInformants" class="entry-content" style="display: none">
+				<?php _e('To select survey points you have the following possibilities', 'tt');?>:
+				<ul style="list-style : disc; padding-left : 1em;">
+					<li><?php _e('Specify exactly one informant (Example: 252)', 'tt');?></li>
+					<li>
+						<?php _e('Use wildcards: % means an arbitrary number of characters, _ means exactly one character', 'tt');?>
+						<ul style="list-style : circle; padding-left : 2em;">
+							<li>8%  -> <?php _e('all points starting with an 8', 'tt'); ?> (81,801,899)</li>
+							<li>8_  -> <?php _e('all points with two digits starting with an 8', 'tt'); ?> (80,81,...)</li>
+							<li>8__ -> <?php _e('all points with three digits starting with an 8', 'tt'); ?> (800,801,...)</li>
+							<li>87_ ->  <?php _e('all points with three digits in which the first one is an 8 and the second one is a 7', 'tt'); ?> (870,871,...)</li>
+							<li>% -> alle Punkte</li>
+						</ul>
+					</li>
+				</ul>
+				<?php _e('ATTENTION: The usage of wildcards for choosing the informant number *only* makes sense for the intial recording. In correction mode you should enter a concrete informant number.', 'tt');?>
+			</div>
+			<div id="helpMode" style="display: none">
+				<?php _e('There are the following modes', 'tt');?>:
+				<ul style="list-style : disc; padding-left : 1em;">
+					<li><b style="font-weight: 800;"><?php _e('Initial recording', 'tt');?></b>: <?php _e('Record new data', 'tt');?></li>
+					<li><b style="font-weight: 800;"><?php _e('Correction', 'tt');?></b>: <?php _e('Correct existing data or add further attestations for an already processed informant', 'tt');?></li>
+					<li><b style="font-weight: 800;"><?php _e('Problems', 'tt');?></b>: <?php _e('Edit existing problems', 'tt');?></li>
+				</ul>
+			</div>
+			
+			<div id="helpConcepts" style="display: none">
+				<?php _e('Selection of the concept(s) that are assigned to this attestation. In most cases the concepts only depend on the respective stimulus, but on some maps (e.g. AIS#1191_1) also on the informant. The pre-selected concept is the one that was assigned the most. Non fitting concepts can be removed, missing concepts can be added through this box.', 'tt');?>
+			</div>
+		</div>
+	<?php
+		va_echo_new_concept_fields('newConceptDialog');
+	}
+	
+	private static function print_rule_table (){
+		
+		$select_sql = 'SELECT t.#Beta#A#, t.#Beta_Example#A#, t.#Position#A#, t.#Description#A#, t.#Comment#A#, t.#Depiction#A# FROM #transcription_rules# t ';
+		
+		$tmapping = self::$mappings['transcription_rules'];
+		$base_chars = self::$db->get_results(self::create_query($select_sql . "WHERE t.#Kind# = '" . $tmapping->get_enum_value('Kind', 'Base')  .  "' ORDER BY t.#Sort_Order# ASC, t.#Beta# ASC"), ARRAY_A);
+		$diacritics = self::$db->get_results(self::create_query($select_sql . "WHERE t.#Kind# = '" . $tmapping->get_enum_value('Kind', 'Diacritic')  .  "' ORDER BY t.#Sort_Order# ASC, t.#Beta# ASC"), ARRAY_A);
+		$special_chars = self::$db->get_results(self::create_query($select_sql . "WHERE t.#Kind# = '" . $tmapping->get_enum_value('Kind', 'Special')  .  "' ORDER BY t.#Sort_Order# ASC, t.#Beta# ASC"), ARRAY_A);
+		$spaces = self::$db->get_results(self::create_query($select_sql . "WHERE t.#Kind# = '" . $tmapping->get_enum_value('Kind', 'Blank')  .  "' ORDER BY t.#Sort_Order# ASC, t.#Beta# ASC"), ARRAY_A);
+		
+		?>
+		<h1 style="text-align: center;"><?php _e('Base characters', 'tt');?></h1>
 			
 			<table class="ruleTable">
 				<thead>
@@ -307,106 +421,7 @@ class TranscriptionTool {
 					?>
 				</tbody>
 			</table>
-			
-			<br />
-			<br />
-			<br />
-			<br />
-			
-			<?php 
-			echo file_get_contents(dirname(__FILE__) . '/' . $rulesFile);
-			?>
-		</div>
-		<div id="enterTranscription">
-		<?php
-		?>
-			<select id="atlasSelection">
-				<option value="-1"><?php _e('Choose atlas', 'tt');?></option>
-				<?php
-				foreach(self::$sources as $source){
-					echo "<option value='$source'>$source</option>";
-				}
-				?>
-			</select>
-			
-			<div id="mapSelectionDiv">
-				<select id="mapSelection">
-				</select>
-				<?php echo self::info_symbol($helpScans);?>
-			</div>
-			
-			<div id="informant_info" class="hidden_c" style="display: inline;">
-				<span class="informant_fields"></span> - <?php _e('Informant no.', 'tt');?>
-				<span class="informant_fields"></span>
-			</div>
-		
-			<div style="float:right; display:inline;">
-				 <input id="region" placeholder="<?php _e('Informant number(s)', 'tt');?>" style="background-color : #ffffff; display : inline;" />
-				 <img  style="vertical-align: middle;" src="<?php echo VA_PLUGIN_URL . '/images/Help.png';?>" id="helpIconInformants" class="helpIcon" />
-			</div>
-			
-			<div style="float:right; display:inline;">
-				<select id="mode" style="background-color:#ffffff;">
-					<option value="first"><?php _e('Initial recording', 'tt');?></option>
-					<option value="correct"><?php _e('Correction', 'tt');?></option>
-					<option value="problems"><?php _e('Problems', 'tt');?> </option>
-				</select>
-				<img  style="vertical-align: middle;" src="<?php echo VA_PLUGIN_URL . '/images/Help.png';?>" id="helpIconMode" class="helpIcon" />
-			</div>
-				
-			<div class="hidden_coll" id="error"></div>
-				
-			<div class="informant_details hidden_c" id="input_fields">
-				<h3 style="display: inline"><?php _e('Transcription', 'tt');?></h3>
-				<a href="#" id="addRow" style="display: inline">(<?php _e('+ Add row', 'tt'); ?>)</a>
-				
-				<table id="inputTable"></table>
-			
-				<br />
-				
-				<input type="button" value="<?php _e('Insert', 'tt');?>" id="insertAttestation"<?php if (!current_user_can(self::$cap_write)) echo ' disabled'; ?> />
-				
-				<input type="button" value="vacat" id="insertVacat"<?php if (!current_user_can(self::$cap_write)) echo ' disabled'; ?> />
-				<?php echo self::info_symbol($helpVacat);?>
-				
-				<input type="button" value="<?php _e('Problem', 'tt');?>" id="insertProblem"<?php if (!current_user_can(self::$cap_write)) echo ' disabled'; ?> />
-				<?php echo self::info_symbol($helpProblem);?>
-			
-				<input type="button" id="addConcept" value="<?php _e('Create new concept', 'tt');?>" style="float: right"<?php if (!current_user_can(self::$cap_write)) echo ' disabled'; ?> />
-			</div>
-
-			<div id="helpInformants" class="entry-content" style="display: none">
-				<?php _e('To select survey points you have the following possibilities', 'tt');?>:
-				<ul style="list-style : disc; padding-left : 1em;">
-					<li><?php _e('Specify exactly one informant (Example: 252)', 'tt');?></li>
-					<li>
-						<?php _e('Use wildcards: % means an arbitrary number of characters, _ means exactly one character', 'tt');?>
-						<ul style="list-style : circle; padding-left : 2em;">
-							<li>8%  -> <?php _e('all points starting with an 8', 'tt'); ?> (81,801,899)</li>
-							<li>8_  -> <?php _e('all points with two digits starting with an 8', 'tt'); ?> (80,81,...)</li>
-							<li>8__ -> <?php _e('all points with three digits starting with an 8', 'tt'); ?> (800,801,...)</li>
-							<li>87_ ->  <?php _e('all points with three digits in which the first one is an 8 and the second one is a 7', 'tt'); ?> (870,871,...)</li>
-							<li>% -> alle Punkte</li>
-						</ul>
-					</li>
-				</ul>
-				<?php _e('ATTENTION: The usage of wildcards for choosing the informant number *only* makes sense for the intial recording. In correction mode you should enter a concrete informant number.', 'tt');?>
-			</div>
-			<div id="helpMode" style="display: none">
-				<?php _e('There are the following modes', 'tt');?>:
-				<ul style="list-style : disc; padding-left : 1em;">
-					<li><b style="font-weight: 800;"><?php _e('Initial recording', 'tt');?></b>: <?php _e('Record new data', 'tt');?></li>
-					<li><b style="font-weight: 800;"><?php _e('Correction', 'tt');?></b>: <?php _e('Correct existing data or add further attestations for an already processed informant', 'tt');?></li>
-					<li><b style="font-weight: 800;"><?php _e('Problems', 'tt');?></b>: <?php _e('Edit existing problems', 'tt');?></li>
-				</ul>
-			</div>
-			
-			<div id="helpConcepts" style="display: none">
-				<?php _e('Selection of the concept(s) that are assigned to this attestation. In most cases the concepts only depend on the respective stimulus, but on some maps (e.g. AIS#1191_1) also on the informant. The pre-selected concept is the one that was assigned the most. Non fitting concepts can be removed, missing concepts can be added through this box.', 'tt');?>
-			</div>
-		</div>
-	<?php
-		va_echo_new_concept_fields('newConceptDialog');
+		<?php 
 	}
 	
 	private static function create_query ($sql, $params = NULL, $no_aliases = false){
