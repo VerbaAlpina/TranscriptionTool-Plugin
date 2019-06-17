@@ -130,3 +130,7 @@ table.ruleTable {
 	margin-left: auto;
 	margin-right: auto;
 }
+
+#informant_filter_screen input {
+	margin: 10px;
+}

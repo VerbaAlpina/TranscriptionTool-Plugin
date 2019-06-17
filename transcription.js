@@ -53,6 +53,25 @@ jQuery(function (){
 	});
 	jQuery("#region").change(ajax_info);
 	
+	jQuery("#informant_filters").qtip({
+		content : {
+			text : jQuery("#informant_filter_screen"),
+			title: {
+				button: true // Close button
+			}
+		},
+		show: "click",
+		hide: "click",
+		position : {
+			my: "bottom right",
+			at: "top left"
+		}
+	});
+	
+	jQuery("#informant_filter_screen input[data-selected=1]").prop("checked", true);
+	
+	jQuery("#informant_filter_screen input").change(ajax_info);
+	
 	jQuery("td.imageTranscriptionRule").click(clickOnRule);
 	
 	jQuery(document).on("focus", ".inputStatement", function (){
@@ -83,13 +102,9 @@ jQuery(function (){
     	writeAttestation();
     });
 	
-	jQuery("#insertVacat").click(function (){
-    	writeAttestation("<vacat>");
-    });
-	
-	jQuery("#insertProblem").click(function (){
-    	writeAttestation("<problem>");
-    });
+	jQuery(".tt_extra_button").click(function (){
+		writeAttestation("<" + jQuery(this).data("dbval") + ">");
+	});
 	
 	var backspaceIsPressed = false;
     jQuery(document).keydown(function(event){
@@ -221,9 +236,21 @@ function addUpperQTips (){
 	});
 }
 
+function isSpecialVal (str){
+	if (str[0] != "<")
+		return false;
+	
+	for (let i = 0; i < SpecialValues.length; i++){
+		if (str === "<" + SpecialValues[i] + ">"){
+			return true;
+		}
+	}
+	return false;
+}
+
 function convertToOriginal (text, type){
 	
-	if(!text || text == '<vacat>' || text == '<problem>')
+	if(!text || isSpecialVal(text))
 		return "";
 	
 	text = text.trim();
@@ -252,7 +279,7 @@ function convertToOriginal (text, type){
 			result += "<span style='position: relative;'>" + entry + "</span>";
 		}
 		else {
-			if (result.startsWith("<")){
+			if (match.trim().startsWith("<")){
 				result += "<span style='color: green'>" + match.replace("<", "&lt;").replace(">", "&gt;") + "</span>";
 			}
 			else {
@@ -436,6 +463,7 @@ function ajax_info (){
 		return;
 	
 	jQuery("#input_fields").addClass("hidden_c");
+	jQuery("#error").html("").addClass("hidden_coll");
 	jQuery("#informant_info").addClass("hidden_c");
 	
 	var mapVal = jQuery("#mapSelection").val();
@@ -444,6 +472,7 @@ function ajax_info (){
 		"query" : "update_informant",
 		"mode" : jQuery("#mode").val(),
 		"region": getRegion(jQuery("#region").val()),
+		"filters" : getFilters(),
 		"id_stimulus" : mapVal.substring(0, mapVal.indexOf("|"))
 	});
 	
@@ -465,7 +494,6 @@ function updateFields (info){
 	
 	try {
 		var obj = JSON.parse(info);
-		errorDiv.html("").addClass("hidden_coll");
 		jQuery("#informant_info").html("<span class='informant_fields'>" + obj[0].Source + " " + obj[0].Map_Number + "_" + obj[0].Sub_Number + " - " + obj[0].Stimulus 
 				+ "</span> - Informant_Nr <span class='informant_fields'>" + obj[0].Informant_Number + "</span> (" + obj[0].Place_Name + ")");
 		
@@ -547,7 +575,7 @@ function writeAttestation (content){
 				if(!text){
 					throw Translations.NO_INPUT.replace("%", index);
 				}
-				else if (cids == null && original != "" /*Empty string used for vacats and problems*/){
+				else if (cids == null && original != "" /*Empty string used for problems or other special values*/){
 					throw Translations.NO_CONCEPTS.replace("%", index)
 				}
 				
@@ -560,19 +588,34 @@ function writeAttestation (content){
 		}
 	}
 	
+	jQuery("#input_fields").addClass("hidden_c");
+	jQuery("#error").html("").addClass("hidden_coll");
+	
 	var ajax_data = create_ajax_data({
 			"query" : "update_transcription",
 			"id_stimulus": State.Id_Stimulus,
 			"id_informant": State.Id_Informant,
 			"mode" : jQuery("#mode").val(),
 			"region" : getRegion(jQuery("#region").val()),
+			"filters" : getFilters(),
 			"data": data
 	});
 	
+	jQuery("#inputTable").css("background", "green");
+	
 	jQuery.post(ajaxurl, ajax_data, function (response) {
-		//TODO show some different color etc. to mark that the transcription has been updated
+		jQuery("#inputTable").css("background", "");
 		updateFields(response);
 	});
+}
+
+function getFilters (){
+	var res = [];
+	jQuery("#informant_filter_screen input:checked").each(function (){
+		res.push([jQuery(this).data("col"), jQuery(this).data("val"), jQuery(this).data("type")]);
+	});
+	
+	return res;
 }
 
 function create_ajax_data (obj){

@@ -23,6 +23,9 @@ class TranscriptionTool {
 	private static $concepts;
 	private static $sources;
 	
+	private static $special_val_buttons;
+	private static $informant_filters;
+	
 	private static $ajax_params = ['action' => 'tt'];
 	
 	private static $cap_read = 'va_transcription_tool_read';
@@ -55,6 +58,14 @@ class TranscriptionTool {
 	
 	static function text_domain (){
 		load_plugin_textdomain( 'tt', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+	}
+	
+	static function add_special_val_button ($text, $dbval, $help = NULL){
+		self::$special_val_buttons[] = [$text, $dbval, $help];
+	}
+	
+	static function add_informant_filter ($col, $val, $type, $text, $selected){
+		self::$informant_filters[] = [$col, $val, $type, $text, $selected];
 	}
 	
 	static function init ($document_path, &$db, $sources, $concepts, $mappings = NULL){
@@ -126,13 +137,11 @@ class TranscriptionTool {
 	
 		$helpProblem = __('This button skips the current informant and marks it as problematic. These problem cases can be transcribed later using the problem mode in the select box on the right', 'tt');
 		
-		$helpVacat = __('Adds a marker to the data base that there are no attestations for this informant.', 'tt');
-		
 		$helpScans = __('If the stimulius is marked green the corresponding scan exists, if it is marked red the scan is missing.', 'tt');
 		
 		$folder = plugins_url('', __FILE__) . '/';
 		
-		wp_enqueue_script('tt_script', $folder . 'transcription.js', [], false, true);
+		wp_enqueue_script('tt_script', $folder . 'transcription.js?v=1', [], false, true);
 		wp_enqueue_style('tt_style', $folder . 'transcription.css');
 		
 		wp_enqueue_script('tt_qtip', $folder . 'lib/qtip/jquery.qtip.min.js', ['jquery']);
@@ -171,6 +180,12 @@ class TranscriptionTool {
 		}
 		wp_localize_script('tt_script', 'Codepage', $char_assoc);
 		wp_localize_script('tt_script', 'url', home_url(self::$document_path));
+		
+		$special_vals = ['problem'];
+		foreach (self::$special_val_buttons as $button_data){
+			$special_vals[] = $button_data[1];
+		}
+		wp_localize_script('tt_script', 'SpecialValues', $special_vals);
 		
 		$rulesFile = 'rules_en.html';
 		$lang = substr(get_user_locale(), 0, 2);
@@ -238,9 +253,24 @@ class TranscriptionTool {
 			</div>
 		
 			<div style="float:right; display:inline;">
-				 <input id="region" placeholder="<?php _e('Informant number(s)', 'tt');?>" style="background-color : #ffffff; display : inline;" />
-				 <img  style="vertical-align: middle;" src="<?php echo VA_PLUGIN_URL . '/images/Help.png';?>" id="helpIconInformants" class="helpIcon" />
+				<input id="region" placeholder="<?php _e('Informant number(s)', 'tt');?>" style="background-color : #ffffff; display : inline;" />
+				<?php if (self::$informant_filters){ ?>
+				<input type="button" id="informant_filters" value="<?php _e('Filters', 'tt');?>">
+				<?php } ?>
+				<img  style="vertical-align: middle;" src="<?php echo VA_PLUGIN_URL . '/images/Help.png';?>" id="helpIconInformants" class="helpIcon" />
 			</div>
+			
+			<?php 
+			if (self::$informant_filters){
+				echo '<div id="informant_filter_screen" style="display: none;">';
+				foreach (self::$informant_filters as $filter){
+					echo '<input type="checkbox" data-col="' . htmlspecialchars($filter[0]) . 
+					'" data-val="' . htmlspecialchars($filter[1]) . '" data-type="' . htmlspecialchars($filter[2]) 
+					. '" data-selected="' . ($filter[3]? '1': '0') . '" /> ' . $filter[4];	
+				}
+				echo '</div>';
+			}
+			?>
 			
 			<div style="float:right; display:inline;">
 				<select id="mode" style="background-color:#ffffff;">
@@ -261,13 +291,15 @@ class TranscriptionTool {
 			
 				<br />
 				
-				<input type="button" value="<?php _e('Insert', 'tt');?>" id="insertAttestation"<?php if (!current_user_can(self::$cap_write)) echo ' disabled'; ?> />
+				<input type="button" style="margin-right: 40px;" value="<?php _e('Insert', 'tt');?>" id="insertAttestation"<?php if (!current_user_can(self::$cap_write)) echo ' disabled'; ?> />
 				
-				<input type="button" value="vacat" id="insertVacat"<?php if (!current_user_can(self::$cap_write)) echo ' disabled'; ?> />
-				<?php echo self::info_symbol($helpVacat);?>
+				<?php 
+				foreach (self::$special_val_buttons as $button_data){
+					self::echo_extra_button($button_data[0], $button_data[1], $button_data[2]);
+				}
 				
-				<input type="button" value="<?php _e('Problem', 'tt');?>" id="insertProblem"<?php if (!current_user_can(self::$cap_write)) echo ' disabled'; ?> />
-				<?php echo self::info_symbol($helpProblem);?>
+				self::echo_extra_button(__('Problem', 'tt'), 'problem', $helpProblem);
+				?>
 			
 				<input type="button" id="addConcept" value="<?php _e('Create new concept', 'tt');?>" style="float: right"<?php if (!current_user_can(self::$cap_write)) echo ' disabled'; ?> />
 			</div>
@@ -304,6 +336,12 @@ class TranscriptionTool {
 		</div>
 	<?php
 		va_echo_new_concept_fields('newConceptDialog');
+	}
+	
+	private static function echo_extra_button ($text, $dbvalue, $help){
+		echo '<input type="button" value="' . htmlspecialchars($text) . '" class="tt_extra_button" data-dbval="' . htmlspecialchars($dbvalue) . '"' . (current_user_can(self::$cap_write)? '': ' disabled') . '/>';
+		if ($help)
+			echo self::info_symbol($help);
 	}
 	
 	private static function print_rule_table (){
@@ -458,13 +496,13 @@ class TranscriptionTool {
 
 	private static function type_to_bg ($type){
 		switch ($type){
-			case 'direkt':
+			case 'direct':
 				return 'LightYellow';
-			case 'unten':
+			case 'below':
 				return 'DarkSeaGreen';
-			case 'oben':
+			case 'above':
 				return 'LightBlue';
-			case 'nach':
+			case 'after':
 				return 'SandyBrown ';
 		}
 	}
@@ -496,7 +534,7 @@ class TranscriptionTool {
 			
 			switch ($_REQUEST['query']){
 				case 'update_informant':
-					echo self::update_informant($_POST['id_stimulus'], $_POST['mode'], $_POST['region']);
+					echo self::update_informant($_POST['id_stimulus'], $_POST['mode'], $_POST['region'], $_POST['filters']);
 				break;
 				
 				case 'update_grammar':
@@ -604,6 +642,7 @@ class TranscriptionTool {
 							WHERE a.#Id_Stimulus# = %d AND a.#Id_Informant# = %d', [$_REQUEST['id_stimulus'], $_REQUEST['id_informant']]));
 			
 			if ($existing){
+				error_log(json_encode($_REQUEST)); //TODO
 				echo 'There is existing data!';
 				die;
 			}
@@ -648,7 +687,6 @@ class TranscriptionTool {
 				$tokenized = self::$db->get_var(self::create_query('SELECT a.#Tokenized# FROM #attestations# a WHERE a.#Id_Attestation# = %d', [$row['id_attestation']]));
 				
 				if ($tokenized){
-					error_log('here');
 					self::check_not_changed($row, $user_name, 'TOK', 'Updating tokenized attestation not allowed');
 				}
 				
@@ -657,10 +695,18 @@ class TranscriptionTool {
 					die;
 				}
 				
-				$updated = self::$db->update($attestation_mapping->get_table_name(), [
-					$attestation_mapping->get_field_name('Attestation') => $row['attestation'],
+				$field_updates = [
+					$attestation_mapping->get_field_name('Attestation') => stripslashes($row['attestation']),
 					$attestation_mapping->get_field_name('Classification') => $row['classification']
-				],[
+				];
+				
+				$old_val = self::$db->get_var(self::create_query('SELECT a.#Attestation# FROM #attestations# a WHERE a.#Id_Attestation# = %d', [$row['id_attestation']]));
+				
+				if ($old_val === '<problem>'){
+					$field_updates[$attestation_mapping->get_field_name('Transcribed_By')] = $user_name;
+				}
+				
+				$updated = self::$db->update($attestation_mapping->get_table_name(), $field_updates,[
 					$attestation_mapping->get_field_name('Id_Attestation') => $row['id_attestation'],
 				]);
 				
@@ -679,7 +725,7 @@ class TranscriptionTool {
 				$inserted = self::$db->insert($attestation_mapping->get_table_name(), [
 				$attestation_mapping->get_field_name('Id_Stimulus') => $_REQUEST['id_stimulus'],
 				$attestation_mapping->get_field_name('Id_Informant') => $_REQUEST['id_informant'],
-				$attestation_mapping->get_field_name('Attestation') => $row['attestation'],
+				$attestation_mapping->get_field_name('Attestation') => stripslashes($row['attestation']),
 				$attestation_mapping->get_field_name('Transcribed_By') => $user_name,
 				$attestation_mapping->get_field_name('Created') => current_time('mysql'),
 				$attestation_mapping->get_field_name('Classification') => $row['classification'],
@@ -697,10 +743,10 @@ class TranscriptionTool {
 			$ids_attestations[] = $id_attestation;
 			
 			//Add concepts
-			if ($row['concepts'] && $row['attestation'] != '<vacat>' && $row['attestation'] != '<problem>'){
+			if ($row['concepts'] && !self::is_special_val($row['attestation'])){
 				foreach ($row['concepts'] as $concept_id){
 					
-					//Conncet concepts
+					//Connect concepts
 					$inserted = self::$db->insert($conn_mapping->get_table_name(), [
 					$conn_mapping->get_field_name('Id_Attestation') => $id_attestation,
 					$conn_mapping->get_field_name('Id_Concept') => $concept_id
@@ -723,11 +769,27 @@ class TranscriptionTool {
 		//Delete all old attestations
 		foreach ($all_ids as $aid){
 			if (!in_array($aid, $ids_attestations)){
+				self::$db->delete ($conn_mapping->get_table_name(), [$conn_mapping->get_field_name('Id_Attestation') => $aid]);
 				self::$db->delete($attestation_mapping->get_table_name(), [$attestation_mapping->get_field_name('Id_Attestation')=> $aid], ['%d']);
 			}
 		}
 		
-		echo self::update_informant($_REQUEST['id_stimulus'], $_REQUEST['mode'], $_REQUEST['region']);
+		echo self::update_informant($_REQUEST['id_stimulus'], $_REQUEST['mode'], $_REQUEST['region'], $_REQUEST['filters']);
+	}
+	
+	private static function is_special_val ($str){
+		$str = mb_substr($str, 1, -1); //Strip < and >
+		
+		if ($str === 'problem')
+			return true;
+		
+		foreach (self::$special_val_buttons as $button_data){
+			if ($button_data[1] === $str){
+				return true;	
+			}
+		}
+		
+		return false;
 	}
 	
 	private static function check_not_changed ($row, $user_name, $context, $msg){
@@ -803,7 +865,7 @@ class TranscriptionTool {
 		return $listing;
 	}
 	
-	private static function update_informant ($id_stimulus, $mode, $region){
+	private static function update_informant ($id_stimulus, $mode, $region, $filters){
 
 		if($mode == 'first'){
 			$modeWhere = 'a.#Id_Attestation# is null';
@@ -813,6 +875,16 @@ class TranscriptionTool {
 		}
 		else {
 			$modeWhere = "a.#Attestation# = '<problem>'";
+		}
+		
+		$ifilter = '';
+		foreach ($filters as $filter){
+			if ($filter[2] == '%s'){
+				$ifilter .= ' AND ' . stripslashes($filter[0]) . ' = "' . esc_sql(stripslashes($filter[1])) . '"' . "\n";
+			}
+			else {
+				$ifilter .= ' AND i.#' . stripslashes($filter[0]) . '# = ' . esc_sql(stripslashes($filter[1])) . "\n";
+			}
 		}
 		
 		$sql = self::create_query("
@@ -837,6 +909,7 @@ class TranscriptionTool {
 			s.#Id_Stimulus# = %d
 			and $modeWhere
 			and i.#Informant_Number# like %s
+			" . $ifilter . "
 		ORDER BY i.#Position# ASC, a.#Id_Attestation# ASC"
 		, [$id_stimulus, $region]);
 
@@ -880,7 +953,7 @@ class TranscriptionTool {
 					!current_user_can(self::$cap_edit) && 
 					$mode == 'correct' && 
 					wp_get_current_user()->user_login !== $row['Transcribed_By'] && 
-					$row['Transcribed_By'] != '';
+					$row['Transcribed_By'] != '' && $row['Attestation'] !== '<problem>';
 				
 				$results[$index]['readonly'] = $cannot_be_edited || $row['Tokenized'];
 				ob_start();
@@ -897,19 +970,40 @@ class TranscriptionTool {
 			WHERE i.#Informant_Number# like %s AND s.#Id_Stimulus# = %d', [$region, $id_stimulus]));
 		
 		if($informant_exists){
+			
+			$not_filtered = self::$db->get_var(self::create_query('
+					SELECT i.#Id_Informant#
+					FROM #informants# i JOIN #stimuli# s ON s.#Source# = i.#Source#
+					WHERE i.#Informant_Number# like %s AND s.#Id_Stimulus# = %d' . $ifilter, [$region, $id_stimulus]));
+			
 			if($mode == 'first'){
-				if($region == '%'){
-					return self::error_string(__('Everything transcribed!', 'tt'));
+				if ($not_filtered){
+					if($region == '%'){
+						return self::error_string(__('Everything transcribed!', 'tt'));
+					}
+					else {
+						return self::error_string(__('Already transcribed!', 'tt'));
+					}
 				}
 				else {
-					return self::error_string(__('Already transcribed!', 'tt'));
+					return self::error_string(__('Informant(s) not included by the current filter options!', 'tt'));
 				}
 			}
 			else if($mode == 'correct'){
-				return self::error_string(__('There is no transcription!', 'tt'));
+				if ($not_filtered){
+					return self::error_string(__('There is no transcription!', 'tt'));
+				}
+				else {
+					return self::error_string(__('Informant(s) not included by the current filter options!', 'tt'));
+				}
 			}
 			else{
-				return self::error_string(__('No more problems!', 'tt'));
+				if ($not_filtered){
+					return self::error_string(__('No more problems!', 'tt'));
+				}
+				else {
+					return self::error_string(__('Informant(s) not included by the current filter options!', 'tt'));
+				}
 			}
 		}	
 		else {
@@ -954,10 +1048,10 @@ class TranscriptionTool {
 			<?php
 				if($author){
 					if ($author == 'TOKENIZED'){
-						echo '<b>' . _e('Tokenized') . '</b>';
+						echo '<b>' . _e('Tokenized', 'tt') . '</b>';
 					}
 					else {
-						echo '<b>' . _e('Transcribed&nbsp;by') . ':&nbsp;</b>' . $author;
+						echo '<b>' . _e('Transcribed&nbsp;by', 'tt') . ':&nbsp;</b>' . $author;
 					}
 				}
 				?>

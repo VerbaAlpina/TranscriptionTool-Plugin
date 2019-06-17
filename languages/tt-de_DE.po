@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2018-11-22 15:06+0100\n"
-"PO-Revision-Date: 2018-11-22 15:08+0100\n"
+"POT-Creation-Date: 2019-05-13 17:27+0200\n"
+"PO-Revision-Date: 2019-05-13 17:28+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: de\n"
@@ -16,11 +16,11 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-SearchPath-0: transcription.php\n"
 
-#: transcription.php:119 transcription.php:122
+#: transcription.php:111 transcription.php:114
 msgid "Transcription tool"
 msgstr "Transkriptionstool"
 
-#: transcription.php:134
+#: transcription.php:138
 msgid ""
 "This button skips the current informant and marks it as problematic. These "
 "problem cases can be transcribed later using the problem mode in the select "
@@ -30,14 +30,7 @@ msgstr ""
 "speziell als problematisch. Später können die Problemfälle über den Modus "
 "Probleme im rechten Auswahlmenü eingetragen werden."
 
-#: transcription.php:136
-msgid ""
-"Adds a marker to the data base that there are no attestations for this "
-"informant."
-msgstr ""
-"Markiert in der Datenbank, dass es für diesen Informanten keine Belege gibt."
-
-#: transcription.php:138
+#: transcription.php:140
 msgid ""
 "If the stimulius is marked green the corresponding scan exists, if it is "
 "marked red the scan is missing."
@@ -45,140 +38,92 @@ msgstr ""
 "Zu grün markierten Stimuli sind Scans vorhanden, zu rot markierten Stimuli "
 "fehlen die entsprechenden Scans."
 
-#: transcription.php:163
+#: transcription.php:160
 msgid "Not valid"
 msgstr "Nicht gültig"
 
-#: transcription.php:164
+#: transcription.php:161
 msgid "Search map"
 msgstr "Karte suchen"
 
-#: transcription.php:165
+#: transcription.php:162
 msgid "No input in line %!"
 msgstr "Keine Eingabe in Zeile %!"
 
-#: transcription.php:166
+#: transcription.php:163
 msgid "No concepts for attestation in line %!"
 msgstr "Keine Konzepte für Beleg in Zeile %!"
 
-#: transcription.php:167
+#: transcription.php:164
 msgid "Attestation in line % is not valid!"
 msgstr "Beleg in Zeile % ist nicht gültig!"
 
-#: transcription.php:168 transcription.php:359
+#: transcription.php:165 transcription.php:294
 msgid "Insert"
 msgstr "Eintragen"
 
-#: transcription.php:169
+#: transcription.php:166
 msgid "Update"
 msgstr "Aktualisieren"
 
-#: transcription.php:170
+#: transcription.php:167
 msgid "This stimulis is currently transcribed by another user!"
 msgstr "Stimulus wird bereits von einem anderen Nutzer transkribiert!"
 
-#: transcription.php:197
-msgid "Base characters"
-msgstr "Basiszeichen"
-
-#: transcription.php:202 transcription.php:227 transcription.php:261
-#: transcription.php:282
-msgid "Character"
-msgstr "Zeichen"
-
-#: transcription.php:203 transcription.php:228 transcription.php:262
-#: transcription.php:283
-msgid "Description"
-msgstr "Beschreibung"
-
-#: transcription.php:204 transcription.php:229 transcription.php:263
-#: transcription.php:284
-msgid "Beta code"
-msgstr "Beta-Code"
-
-#: transcription.php:205 transcription.php:230
-msgid "Comment"
-msgstr "Kommentar"
-
-#: transcription.php:222
-msgid "Diacritics"
-msgstr "Diakritika"
-
-#: transcription.php:231 transcription.php:264 transcription.php:285
-msgid "Example"
-msgstr "Beispiel"
-
-#: transcription.php:255
-msgid "Special characters"
-msgstr "Spezielle Zeichen"
-
-#: transcription.php:256
-msgid ""
-"In principle, these characters are equivalent to base characters, except "
-"that they cannot be combined with diacritics."
-msgstr ""
-"Diese Zeichen haben prinzipiell den Rang eines Basiszeichens, können aber "
-"nicht mit Diakritika ergänzt werden."
-
-#: transcription.php:278
-msgid "Special Blanks"
-msgstr "Spezielle Leerzeichen"
-
-#: transcription.php:278
-msgid "Regular blanks are represented by the character ␣ in this table"
-msgstr ""
-"Reguläre Leerzeichen werden in dieser Tabelle durch das Symbol ␣ dargestellt."
-
-#: transcription.php:315
+#: transcription.php:236
 msgid "Choose atlas"
 msgstr "Atlas wählen"
 
-#: transcription.php:330
+#: transcription.php:251
 msgid "Informant no."
 msgstr "Informant-Nr."
 
-#: transcription.php:335
+#: transcription.php:256
 msgid "Informant number(s)"
 msgstr "Informanten-Nummer(n)"
 
-#: transcription.php:341 transcription.php:390
+#: transcription.php:258
+msgid "Filters"
+msgstr "Filter"
+
+#: transcription.php:277 transcription.php:327
 msgid "Initial recording"
 msgstr "Ersterfassung"
 
-#: transcription.php:342 transcription.php:391
+#: transcription.php:278 transcription.php:328
 msgid "Correction"
 msgstr "Korrektur"
 
-#: transcription.php:343 transcription.php:392
+#: transcription.php:279 transcription.php:329
 msgid "Problems"
 msgstr "Probleme"
 
-#: transcription.php:351
+#: transcription.php:287
 msgid "Transcription"
 msgstr "Transkription"
 
-#: transcription.php:352
+#: transcription.php:288
 msgid "+ Add row"
 msgstr "Zeile hinzufügen"
 
-#: transcription.php:364
+#: transcription.php:301
 msgid "Problem"
 msgstr "Problem"
 
-#: transcription.php:367
+#: transcription.php:304
 msgid "Create new concept"
 msgstr "Neues Konzept anlegen"
 
-#: transcription.php:371
+#: transcription.php:308
 msgid "To select survey points you have the following possibilities"
 msgstr ""
 "Zur Auswahl von Erhebungspunkten stehen folgende Möglichkeiten zur Verfügung"
 
-#: transcription.php:373
+#: transcription.php:310
 msgid "Specify exactly one informant (Example: 252)"
 msgstr "Angabe exakt eines Informanten (Beispiel: 252)"
 
-#: transcription.php:375
+#: transcription.php:312
 msgid ""
 "Use wildcards: % means an arbitrary number of characters, _ means exactly "
 "one character"
@@ -186,19 +131,19 @@ msgstr ""
 "Verwendung von Wildcards: % steht für eine beliebige Anzahl beliebiger "
 "Zeichen, _ steht für genau ein beliebiges Zeichen"
 
-#: transcription.php:377
+#: transcription.php:314
 msgid "all points starting with an 8"
 msgstr "alle Punkte, die mit einer 8 beginnen"
 
-#: transcription.php:378
+#: transcription.php:315
 msgid "all points with two digits starting with an 8"
 msgstr "alle Punkte bestehend aus zwei Ziffern, von denen die erste eine 8 ist"
 
-#: transcription.php:379
+#: transcription.php:316
 msgid "all points with three digits starting with an 8"
 msgstr "alle Punkte bestehend aus drei Ziffern, von denen die erste eine 8 ist"
 
-#: transcription.php:380
+#: transcription.php:317
 msgid ""
 "all points with three digits in which the first one is an 8 and the second "
 "one is a 7"
@@ -206,7 +151,7 @@ msgstr ""
 "alle Punkte bestehend aus drei Ziffern, von denen die erste eine 8 und die "
 "zweite eine 7 ist"
 
-#: transcription.php:385
+#: transcription.php:322
 msgid ""
 "ATTENTION: The usage of wildcards for choosing the informant number *only* "
 "makes sense for the intial recording. In correction mode you should enter a "
@@ -216,15 +161,15 @@ msgstr ""
 "der Auswahl der Informantennummern sinnvoll. Im Korrektur-Modus ist jeweils "
 "eine konkrete Informantennummer einzugeben."
 
-#: transcription.php:388
+#: transcription.php:325
 msgid "There are the following modes"
 msgstr "Es gibt folgende Modi"
 
-#: transcription.php:390
+#: transcription.php:327
 msgid "Record new data"
 msgstr "Neue Daten erfassen"
 
-#: transcription.php:391
+#: transcription.php:328
 msgid ""
 "Correct existing data or add further attestations for an already processed "
 "informant"
@@ -232,11 +177,11 @@ msgstr ""
 "Bestehende Daten korrigieren bzw. weitere Belege für einen bereits "
 "bearbeiteten Informanten hinzufügen"
 
-#: transcription.php:392
+#: transcription.php:329
 msgid "Edit existing problems"
 msgstr "Bestehende Probleme bearbeiten"
 
-#: transcription.php:397
+#: transcription.php:334
 msgid ""
 "Selection of the concept(s) that are assigned to this attestation. In most "
 "cases the concepts only depend on the respective stimulus, but on some maps "
@@ -251,49 +196,129 @@ msgstr ""
 "zugeordnet wurde. Nicht zutreffende Konzepte können über dieses Feld "
 "entfernt werden, fehlende Konzepte ausgewählt werden."
 
-#: transcription.php:737
+#: transcription.php:358
+msgid "Base characters"
+msgstr "Basiszeichen"
+
+#: transcription.php:363 transcription.php:388 transcription.php:422
+#: transcription.php:443
+msgid "Character"
+msgstr "Zeichen"
+
+#: transcription.php:364 transcription.php:389 transcription.php:423
+#: transcription.php:444
+msgid "Description"
+msgstr "Beschreibung"
+
+#: transcription.php:365 transcription.php:390 transcription.php:424
+#: transcription.php:445
+msgid "Beta code"
+msgstr "Beta-Code"
+
+#: transcription.php:366 transcription.php:391
+msgid "Comment"
+msgstr "Kommentar"
+
+#: transcription.php:383
+msgid "Diacritics"
+msgstr "Diakritika"
+
+#: transcription.php:392 transcription.php:425 transcription.php:446
+msgid "Example"
+msgstr "Beispiel"
+
+#: transcription.php:416
+msgid "Special characters"
+msgstr "Spezielle Zeichen"
+
+#: transcription.php:417
+msgid ""
+"In principle, these characters are equivalent to base characters, except "
+"that they cannot be combined with diacritics."
+msgstr ""
+"Diese Zeichen haben prinzipiell den Rang eines Basiszeichens, können aber "
+"nicht mit Diakritika ergänzt werden."
+
+#: transcription.php:439
+msgid "Special Blanks"
+msgstr "Spezielle Leerzeichen"
+
+#: transcription.php:439
+msgid "Regular blanks are represented by the character ␣ in this table"
+msgstr ""
+"Reguläre Leerzeichen werden in dieser Tabelle durch das Symbol ␣ dargestellt."
+
+#: transcription.php:982
 msgid "Everything transcribed!"
 msgstr "Alles transkribiert!"
 
-#: transcription.php:740
+#: transcription.php:985
 msgid "Already transcribed!"
 msgstr "Bereits transkribiert!"
 
-#: transcription.php:744
+#: transcription.php:989 transcription.php:997 transcription.php:1005
+msgid "Informant(s) not included by the current filter options!"
+msgstr "Informant(en) durch aktuelle Filtereinstellungen ausgeschlossen!"
+
+#: transcription.php:994
 msgid "There is no transcription!"
 msgstr "Keine Transkription vorhanden!"
 
-#: transcription.php:747
+#: transcription.php:1002
 msgid "No more problems!"
 msgstr "Keine weiteren Probleme!"
 
-#: transcription.php:751
+#: transcription.php:1010
 msgid "Informant number(s) not valid!"
 msgstr "Informanten-Nummer(n) nicht gültig!"
 
-#: transcription.php:776
+#: transcription.php:1035
 msgid "attestation"
 msgstr "Beleg"
 
-#: transcription.php:777
+#: transcription.php:1036
 msgid "phon. type"
 msgstr "Phon. Typ"
 
-#: transcription.php:778
+#: transcription.php:1037
 msgid "morph. type"
 msgstr "Morph. Typ"
 
-#: transcription.php:783
+#: transcription.php:1042
 msgid "Choose Concept(s)"
 msgstr "Konzept(e) auswählen"
 
-#: transcription.php:791
+#: transcription.php:1051
+msgid "Tokenized"
+msgstr "Tokenisiert"
+
+#: transcription.php:1054
 msgid "Transcribed&nbsp;by"
 msgstr "Erfasst&nbsp;von"
 
-#: transcription.php:801
+#: transcription.php:1065
 msgid "Remove&nbsp;row"
 msgstr "Zeile&nbsp;entfernen"
+
+#~ msgid "Filter"
+#~ msgstr "Filter"
+
+#~ msgid ""
+#~ "Adds a marker to the data base that there are no attestations for this "
+#~ "informant."
+#~ msgstr ""
+#~ "Markiert in der Datenbank, dass es für diesen Informanten keine Belege "
+#~ "gibt."
+
+#~ msgid ""
+#~ "Adds a marker to the data base that this concept is not known at this "
+#~ "place."
+#~ msgstr ""
+#~ "Markiert in der Datenbank, dass dieses Konzept an diesem Ort unbekannt "
+#~ "ist."
+
+#~ msgid "Concept does not exist"
+#~ msgstr "Konzept nicht vorhanden"
 
 #~ msgid "No transcription existent!"
 #~ msgstr "Keine Transkription vorhanden!"

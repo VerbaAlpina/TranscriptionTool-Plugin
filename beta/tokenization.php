@@ -7,6 +7,7 @@ class Tokenizer {
 	private $copy_rules = [];
 	
 	private $postProcessFunctions = [];
+	private $preProcessFunctions = [];
 	
 	private $ignore_areas_escape = [];
 	private $ignore_areas_copy = [];
@@ -41,6 +42,10 @@ class Tokenizer {
 				$newParts = $this->customExplode($level, $token['token'], $token['offset'], $num == count($this->levels) - 1);
 				foreach ($newParts as $index => $newPart){
 					$tokenNew = trim($newPart[0]);
+					if (!$tokenNew){
+						$this->error('Record contains empty token: ' . $record);
+					}
+					
 					$offset = $token['offset'] + $newPart[1] + strpos($newPart[0], $tokenNew);
 					
 					$newData = [
@@ -70,11 +75,20 @@ class Tokenizer {
 			echo 'Record "' . htmlentities($record) . '"<br />';
 		}
 		
+		foreach ($this->preProcessFunctions as $preFun){
+			$record = $preFun($record, $extraData);
+		}
+		
+		if (self::DEBUG){
+			echo 'After preprocess functions: "' . htmlentities($record) . '"<br />';
+		}
+		
 		$this->ignore_areas_copy = [];
 		$this->ignore_areas_escape = [];
 		
 		$record = trim($record);
-		$record = preg_replace('/ +/', ' ', $record);
+		$record = str_replace("\xC2\xA0", ' ', $record); //Non breaking spaces
+		$record = preg_replace('/\s+/', ' ', $record);
 		
 		foreach ($this->replacement_rules as $replaceArray){
 			$conditionFun = $replaceArray['condition'];
@@ -134,6 +148,10 @@ class Tokenizer {
 		}
 		
 		return $record;
+	}
+	
+	public function addPreProcessFunction ($fun){
+		$this->preProcessFunctions[] = $fun;
 	}
 	
 	public function addPostProcessFunction ($fun){
@@ -313,7 +331,7 @@ class Tokenizer {
 	
 	private function appendToCField ($text, $field, $copyInterval, &$fields){
 		if(is_callable($copyInterval[4])){
-			$savedContent = $copyInterval[4]($text);
+			$savedContent = $copyInterval[4]($text, $this);
 		}
 		else {
 			$savedContent = $text;
@@ -356,461 +374,13 @@ class Tokenizer {
 	}
 }
 
-function va_add_original_and_ipa ($tokenizer, $tokens, $global, $extraData){
-	$parser = $tokenizer->getData('beta_parser');
-	
-	$isConcept = function ($token, $concept){
-		return isset($token['Konzepte']) && count($token['Konzepte']) == 1 && $token['Konzepte'][0] == $concept;
-	};
-	
-	foreach ($tokens as &$token){
-		if ($token['Token'] && $parser && !$isConcept($token, 779)){ //TODO add more generic support for special concepts
-			$chars = $parser->split_chars($token['Token']);
-			if($chars == false){
-				$tokenizer->error('Record not valid: ' . $token['Token']);
-			}
-			
-			$res = $parser->convert_to_ipa($chars);
-			if($res['string']){
-				$token['IPA'] = $res['string'];
-			}
-			else {
-				$token['IPA'] = '';
-				foreach ($res['output'] as $missing){
-					if (!in_array($missing[1], $global['warnings'])){
-						$global['warnings'][] = $missing[1];
-					}
-				}
-			}
-
-			$res = $parser->convert_to_original($chars);
-			if($res['string']){
-				$token['Original'] = $res['string'];
-			}
-			else {
-				$token['Original'] = '';
-
-				if($res['output'][0][0] != 'error'){ //Ignore errors, cause some sources cannot or doesn't need to be translated
-					foreach ($res['output'] as $missing){
-						if (!in_array($missing[1], $global['warnings'])){
-							$global['warnings'][] = $missing[1];
-						}
-					}
-				}
-			}
-		}
-		else {
-			$token['IPA'] = '';
-			$token['Original'] = '';
-		}
-	}
-	
-	return [$tokens, $global];
-}
-
-function va_tokenize_handle_groups_and_concepts ($tokenizer, $tokens, $global, $extraData){
-
-	if(empty($extraData['concepts'])){
-		throw new TokenizerException('No concepts given!');
-	}
-	
-	$global['groups'] = [];
-	
-	$articles = $tokenizer->getData('articles');
-	$schars = $tokenizer->getData('schars');
-	
-	//Split into groups
-	$groups = [];
-	$current_index = 0;
-	foreach ($tokens as $token){
-		if($token['Ebene_3'] == 1){
-			$current_index++;
-			$groups[$current_index] = [$token];
-		}
-		else {
-			$groups[$current_index][] = $token;
-		}
-	}
-	
-	$result = [];
-	
-	$isConcept = function ($token, $concept){
-		return isset($token['Konzepte']) && count($token['Konzepte']) == 1 && $token['Konzepte'][0] == $concept;
-	};
-	
-	//Handle groups
-	foreach ($groups as &$group){
-		$len = count($group);
-		
-		if($len == 1){ //One Token
-			$group[0]['Id_Tokengruppe'] = NULL;
-			if (in_array($token['Token'], $schars)){
-				$group[0]['Konzepte'] = [779];
-			}
-			else {
-				$group[0]['Konzepte'] = $extraData['concepts'];
-			}
-		}
-		else {
-			$group_gender_from_article = '';
-			//Mark articles and special characters
-			foreach ($group as $index => $token){
-				if(array_key_exists($token['Token'], $articles) && ($articles[$token['Token']][1] == '' || strpos($extraData['lang'], $articles[$token['Token']][1]) !== false)){
-					$group[$index]['Konzepte'] = [699];
-					$group[$index]['Genus'] = $articles[$token['Token']][0];
-					
-					if($index == 0 || ($index == 1 && $isConcept($group[$index-1], 779))){
-						$group_gender_from_article = $articles[$token['Token']][0];
-					}
-				}
-				else if (in_array($token['Token'], $schars)){
-					$group[$index]['Konzepte'] = [779];
-				}
-			}
-			
-			//Article + token => no group
-			if($len == 2 && $isConcept($group[0], 699)){
-				$group[0]['Id_Tokengruppe'] = NULL;
-				$group[1]['Id_Tokengruppe'] = NULL;
-				$group[1]['Konzepte'] = $extraData['concepts'];
-				
-				if($group[1]['Genus'] == ''){
-					$group[1]['Genus'] = $group_gender_from_article;
-				}
-			}
-			//special char + token => no group
-			else if ($len == 2 && $isConcept($group[0], 779)){
-				$group[0]['Id_Tokengruppe'] = NULL;
-				$group[1]['Id_Tokengruppe'] = NULL;
-				$group[1]['Konzepte'] = $extraData['concepts'];
-			}
-			//special char + token + special char => no group
-			else if ($len == 3 && $isConcept($group[0], 779) && $isConcept($group[2], 779)){
-				$group[0]['Id_Tokengruppe'] = NULL;
-				$group[1]['Id_Tokengruppe'] = NULL;
-				$group[2]['Id_Tokengruppe'] = NULL;
-				$group[1]['Konzepte'] = $extraData['concepts'];
-			
-				//Move notes to "real" token
-				$group[1]['Bemerkung'] = $group[2]['Bemerkung'];
-				$group[2]['Bemerkung'] = '';
-			}
-			//Article + token + special char => no group
-			else if ($len == 3 && $isConcept($group[0], 699) && $isConcept($group[2], 779)){
-				$group[0]['Id_Tokengruppe'] = NULL;
-				$group[1]['Id_Tokengruppe'] = NULL;
-				$group[1]['Konzepte'] = $extraData['concepts'];
-				$group[2]['Id_Tokengruppe'] = NULL;
-				
-				if($group[1]['Genus'] == ''){
-					$group[1]['Genus'] = $group_gender_from_article;
-				}
-				
-				//Move notes to "real" token
-				$group[1]['Bemerkung'] = $group[2]['Bemerkung'];
-				$group[2]['Bemerkung'] = '';
-			}
-			//Special char + article + token => no group
-			else if ($len == 3 && $isConcept($group[1], 699) && $isConcept($group[0], 779)){
-				$group[0]['Id_Tokengruppe'] = NULL;
-				$group[1]['Id_Tokengruppe'] = NULL;
-				$group[2]['Konzepte'] = $extraData['concepts'];
-				$group[2]['Id_Tokengruppe'] = NULL;
-				
-				if($group[2]['Genus'] == ''){
-					$group[2]['Genus'] = $group_gender_from_article;
-				}
-			}
-			//Group
-			else {
-				$indexGroup = count($global['groups']);
-				$group_gender = '';
-				$group_notes = $group[$len - 1]['Bemerkung'];
-				$group[$len - 1]['Bemerkung'] = '';
-				
-				if($group[$len - 1]['Genus'] == ''){
-					$group_gender = $group_gender_from_article;
-				}
-				else {
-					$group_gender = $group[$len - 1]['Genus'];
-				}
-				
-				$global['groups'][] = ['Genus' => $group_gender, 'Bemerkung' => $group_notes, 'Konzepte' => $extraData['concepts'], 'MTyp' => NULL, 'PTyp' => NULL];
-				
-				foreach ($group as $index => $token){
-					$group[$index]['Id_Tokengruppe'] = 'NEW' . $indexGroup;
-					if(!array_key_exists('Konzepte', $group[$index])){
-						$group[$index]['Konzepte'] = [];
-					}
-					if(!$isConcept($group[$index], 699)){
-						$group[$index]['Genus'] = '';
-					}
-					$group[$index]['Bemerkung'] = '';
-				}
-			}
-		}
-		
-		foreach ($group as $token){
-			$result[] = $token;
-		}
-	}
-	
-	return [$result, $global];
-}
-
-function va_tokenize_to_db_cols ($tokenizer, $tokens, $global, $extraData){
-	$result = [];
-	
-	foreach ($tokens as $token){
-		$newToken = [];
-		
-		$newToken['Token'] = $token['token'];
-		
-		//Set spaces for token groups
-		if($token['delimiter'] == ';' || $token['delimiter'] == ',' || $token['delimiter'] === NULL){
-			$newToken['Trennzeichen'] = NULL;
-			$newToken['Trennzeichen_Original'] = NULL;
-			$newToken['Trennzeichen_IPA'] = NULL;
-		}
-		else {
-			$newToken['Trennzeichen'] = $token['delimiter'];
-			
-			$parser = $tokenizer->getData('beta_parser');
-			
-			if($parser){
-				$space_ipa = $parser->convert_space_to_ipa($token['delimiter']);
-				if($space_ipa !== false){
-					$newToken['Trennzeichen_IPA'] = $space_ipa;
-				}
-				else {
-					$newToken['Trennzeichen_IPA'] = '';
-				}
-				
-				$space_org = $parser->convert_space_to_original($token['delimiter']);
-				if($space_org !== false){
-					$newToken['Trennzeichen_Original'] = $space_org;
-				}
-				else {
-					$newToken['Trennzeichen_Original'] = NULL;
-				}
-			}
-			else {
-				$newToken['Trennzeichen_IPA'] = NULL;
-				$newToken['Trennzeichen_Original'] = NULL;
-			}
-		}
-		
-		//Set token indexes
-		foreach ($token['indexes'] as $index => $num){
-			$newToken['Ebene_' . ($index + 1)] = $num + 1;
-		}
-
-		//Set notes
-		$notesList = [];
-		if($extraData['notes'] && $newToken['Trennzeichen'] === NULL){
-			$notesList[] = $extraData['notes'];
-		}
-		if(isset($token['cfields']['notes'])){
-			$notesList[] = $token['cfields']['notes'];
-		}
-		$newToken['Bemerkung'] = implode(' ', $notesList);
-		
-		$result[] = $newToken;
-	}
-	return [$result, $global];
-}
-
-function va_tokenize_handle_source_types ($tokenizer, $tokens, $global, $extraData){
-	global $va_xxx;
-	
-	$global['mtypes'] = [];
-	$global['ptypes'] = [];
-	
-	$currentGroupTypesBeta = [];
-	$currentGroupTypesOrg = [];
-	$indexGroup = 0;
-	
-	if($extraData['class'] != 'B'){
-		$parser = $tokenizer->getData('beta_parser');
-		
-		foreach ($tokens as $index => &$token){
-			$gender = $token['Genus'];
-			$parsed = $parser->convert_to_original($token['Token'], 'UPPERCASE');
-			if(!$parsed['string']){
-				if($parsed['output'][0][0] == 'error'){
-					$tokenizer->error($parsed['output'][0][1]);
-				}
-				else {
-					foreach ($parsed['output'] as $warning){
-						if(!in_array($warning[1], $global['warnings'])){
-							$global['warnings'][] = $warning[1];
-						}
-					}
-				}
-			}
-			else {
-				$containsHtml = $parsed['string'] != strip_tags($parsed['string']);
-			}
-
-			if($extraData['class'] == 'M'){
-				$type_id = $va_xxx->get_var($va_xxx->prepare('SELECT Id_morph_Typ FROM morph_Typen WHERE Beta = %s AND Genus = %s AND Quelle = %s', $token['Token'], $gender, $tokenizer->getData('source')));
-				if($type_id){
-					$token['MTyp'] = intval($type_id);
-				}
-				else {
-					$token['MTyp'] = 'NEW' . count($global['mtypes']);
-					$global['mtypes'][] = ['Beta' => $token['Token'], 'Orth' => ($parsed['string']?: ''), 'Genus' => $gender, 'Quelle' => $tokenizer->getData('source')];
-				}
-				$token['PTyp'] = NULL;
-			}
-			else {
-				$type_id = $va_xxx->get_var($va_xxx->prepare('SELECT Id_phon_Typ FROM phon_Typen WHERE Beta = %s AND Quelle = %s', $token['Token'], $tokenizer->getData('source')));
-				if($type_id){
-					$token['PTyp'] = intval($type_id);
-				}
-				else {
-					$token['PTyp'] = 'NEW' . count($global['ptypes']);
-					$global['ptypes'][] = ['Beta' => $token['Token'], 'Original' => ($parsed['string']?: ''), 'Quelle' => $tokenizer->getData('source')];
-				}
-				$token['MTyp'] = NULL;
-			}
-			
-			$currentGroupTypesBeta[] = $token['Token'] . $token['Trennzeichen'];
-			if ($token['Trennzeichen_Original'] !== '' && $parsed['string']){
-				if ($currentGroupTypesOrg !== NULL){
-					$currentGroupTypesOrg[] = $parsed['string'] . $token['Trennzeichen_Original'];
-				}
-			}
-			else {
-				$currentGroupTypesOrg = NULL;
-			}
-			
-			//Last token of group
-			if($index == count($tokens) - 1 || $tokens[$index + 1]['Ebene_3'] == 1){
-				if($token['Id_Tokengruppe'] !== NULL){
-					$betaGroup = implode('', $currentGroupTypesBeta);
-					$group = &$global['groups'][$indexGroup];
-					$groupGender = $group['Genus'];
-					
-					if($extraData['class'] == 'M'){
-						$gtype_id = $va_xxx->get_var($va_xxx->prepare('SELECT Id_morph_Typ FROM morph_Typen WHERE Beta = %s AND Genus = %s AND Quelle = %s', $betaGroup, $groupGender, $tokenizer->getData('source')));
-						if ($gtype_id){
-							$group['MTyp'] = $gtype_id;
-						}
-						else {
-							$group['MTyp'] = 'NEW' . count($global['mtypes']);
-							$global['mtypes'][] = [
-								'Beta' => $betaGroup, 
-								'Orth' => ($currentGroupTypesOrg? implode('', $currentGroupTypesOrg): ''),
-								'Genus' => $groupGender, 
-								'Quelle' => $tokenizer->getData('source')];
-						}
-					}
-					else {
-						$gtype_id = $va_xxx->get_var($va_xxx->prepare('SELECT Id_phon_Typ FROM phon_Typen WHERE Beta = %s AND Quelle = %s', $betaGroup,$tokenizer->getData('source')));
-						if ($gtype_id){
-							$group['PTyp'] = intval($gtype_id);
-						}
-						else {
-							$group['PTyp'] = 'NEW' . count($global['ptypes']);
-							$global['ptypes'][] = [
-								'Beta' => $betaGroup, 
-								'Original' => ($currentGroupTypesOrg? implode('', $currentGroupTypesOrg): ''),
-								'Quelle' => $tokenizer->getData('source')];
-						}
-					}
-					
-					$addGroup = $tokenizer->getData('source') . '-Typ "' . ($currentGroupTypesOrg? implode('', $currentGroupTypesOrg): $betaGroup) . '"';
-					$group['Bemerkung'] = ($group['Bemerkung']? $group['Bemerkung'] . ' ' . $addGroup: $addGroup);
-					$indexGroup++;
-				}
-				$currentGroupTypesBeta = [];
-				$currentGroupTypesOrg = [];
-			}
-			
-			$add = $tokenizer->getData('source') . '-Typ "' . (($parsed['string'] && !$containsHtml) ? $parsed['string'] : $token['Token']) . '"';
-			$token['Token'] = '';
-			$token['Bemerkung'] = ($token['Bemerkung']? $token['Bemerkung'] . ' ' . $add: $add);
-		}
-	}
-	else {
-		foreach ($tokens as &$token){
-			$token['MTyp'] = NULL;
-			$token['PTyp'] = NULL;
-		}
-	}
-
-	return [$tokens, $global];
-}
-
-function va_tokenize_split_double_genders ($tokenizer, $tokens, $global, $extraData){
-	$result = [];
-	
-	//Duplicate tokens with multiple gender information
-	$currentGroup = [];
-	
-	foreach ($tokens as $index => $token){
-		//Last token in group
-		if($index == count($tokens) - 1 || $tokens[$index + 1]['Ebene_3'] == 1){
-
-			if(isset($token['Bemerkung'])){
-				$genderRegex = '/(?<=^|[ .,;])[MFNmfn](?=$|[ .,;])/';
-				$notes = $token['Bemerkung'];
-				preg_match_all($genderRegex, $notes, $matches, PREG_OFFSET_CAPTURE);
-				
-				if(count($matches[0]) > 0){
-					$genderStrs = [];
-					$offset = 0;
-					foreach ($matches[0] as $match){
-						$start = $match[1] - $offset;
-						$len = ($start == strlen($notes) - 1 || $notes[$start + 1] != '.'? 1: 2);
-						$genderStr = substr($notes, $start, $len);
-						if(!in_array(strtolower($genderStr), array_map(function ($arr) {return strtolower($arr[0]);}, $genderStrs))){
-							$genderStrs[] = [$genderStr, $start];
-							$notes = substr($notes, 0, $start) . substr($notes, $start + $len);
-							$offset += $len;
-						}
-					}
-
-					
-					foreach ($genderStrs as $genderStr){
-						foreach ($currentGroup as $gtoken){
-							$result[] = $gtoken;
-						}
-						$newToken = $token;
-						$newToken['Bemerkung'] = trim(substr($notes, 0, $genderStr[1]) . $genderStr[0] . substr($notes, $genderStr[1]));
-						$newToken['Genus'] = strtolower($genderStr[0][0]);
-						$result[] = $newToken;
-					}
-					$currentGroup = [];
-					continue;
-				}
-			}
-			
-			$token['Genus'] = '';
-			foreach ($currentGroup as $gtoken){
-				$result[] = $gtoken;
-			}
-			$result[] = $token;
-			$currentGroup = [];
-		}
-		else {
-			$token['Genus'] = '';
-			$currentGroup[] = $token;
-		}
-	}
-	return [$result, $global];
-}
-
 class TokenizerException extends Exception {
-	private $msg;
-	
 	public function __construct($msg){
-		$this->msg = $msg;
+		parent::__construct($msg);
 	}
 	
 	public function __toString (){
-		return $this->msg;
+		return $this->getMessage();
 	}
 }
 ?>

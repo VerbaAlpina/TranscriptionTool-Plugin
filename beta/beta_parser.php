@@ -70,14 +70,14 @@ class BetaParser {
 			}
 			
 			if($res['str'] !== $input){
-				return false;
+				return ['String not valid after: ' . $res['str'], false];
 			}
 		}
 		catch (Exception $e){
-			return false;
+			return [$e->getMessage(), false];
 		}
 
-		return $res['arr'];
+		return [$res['arr'], true];
 	}
 	
 	private function set_parser_for_option ($option){
@@ -163,14 +163,15 @@ class BetaParser {
 		}
 		
 		if(is_string($input)){
-			$chars = $this->split_chars($input, $option);
+			list($chars, $valid) = $this->split_chars($input, $option);
 		}
 		else {
 			$chars = $input;
+			$valid = true;
 		}
 
-		if ($chars === false)
-			return ['string' => false, 'output' => [['error', 'Record not valid: ' . $input]]];
+		if ($chars === false || !$valid)
+			return ['string' => false, 'output' => [['error', 'Record not valid: ' . $input . ' -> ' . $chars]]];
 
 		$missing = [];
 		
@@ -179,7 +180,6 @@ class BetaParser {
 		$output = [];
 		
 		foreach ($chars as $char){
-			
 			if(strlen($char) == 3 && $char[0] == '\\' && $char[1] == '\\'){ //Escaped characters:
 				$result .= $char[2];
 			}
@@ -229,13 +229,14 @@ class BetaParser {
 			return false;
 		
 		if(is_string($input)){
-			$chars = $this->split_chars($input, $option);
+			list($chars, $valid) = $this->split_chars($input, $option);
 		}
 		else {
 			$chars = $input;
+			$valid = true;
 		}
 		
-		if ($chars === false)
+		if ($chars === false || !$valid)
 			return false;
 			
 		$missing = [];
@@ -270,7 +271,7 @@ class BetaParser {
 					$numVowels++;
 				}
 			}
-			else if (!in_array($char, $missing)){
+			else if (!in_array($char, $missing) && mb_strpos($char, '\\\\') === false){
 				$missing[] = $char;
 			}
 		}
@@ -303,7 +304,7 @@ class BetaParser {
 		
 		$cb = function ($input) use ($returnType, $id, $beta, &$cb){
 			//echo 'INPUT: '. json_encode($input) . '<br>';
-			if($beta && $id == 'Zeichen'){
+			if($beta && $id == 'Basiszeichen'){ //TODO not perfect o:{x}: is allowed
 				$this->currentDiacritics = [];
 			}
 	
@@ -634,6 +635,8 @@ class BetaParser {
 
 	private function beta_shortcodes ($shortcode, $dtype){
 		switch ($shortcode){
+			case 'z':
+				return 'Zeichen';
 			case 'b':
 				return 'Basiszeichen';
 			case 'd':
@@ -648,7 +651,7 @@ class BetaParser {
 	}
 	
 	private function beta_to_grammar ($rule, $dtype){
-		$count = preg_match_all('/<([bdxsn])(\*)?>/', $rule, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
+		$count = preg_match_all('/<([bdxsnz])(\*)?>/', $rule, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
 		if ($count == 0){
 			if (strlen($rule) == '1' && !is_numeric($rule)){
 				return ['sequence', [['literal', $rule], ['not', ['identifier', 'Ziffer']]]];
@@ -720,7 +723,7 @@ class BetaParser {
 		if($returnType == 'string'){
 			$pre = '';
 			
-			if($key == 'Zeichen' || $key == 'Grossbuchstabe'){
+			if($key == 'Basiszeichen' || $key == 'Grossbuchstabe'){
 				$pre = 'diacriticsUsed = {};';
 			}
 			else if (strpos($key, 'Diakritikum') === 0){
