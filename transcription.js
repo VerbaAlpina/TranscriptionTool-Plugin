@@ -4,7 +4,12 @@ var parserType;
 
 var lastInput = null;
 
+function loadContent (){
+	jQuery("#iframeScan").contents().find("div#content").html(Rules);
+}
+
 jQuery(function (){
+	
 	jQuery("#atlasSelection").val(-1);
 	jQuery("#mode").val("first");
 	jQuery("#region").val("");
@@ -15,9 +20,9 @@ jQuery(function (){
 	
 	jQuery(".helpIcon").each(addUpperQTips);
 	
-	select2Data = getConceptSearchDefaults();
+	select2Data = getConceptSearchDefaults(); //TODO
 	select2Data["data"] = Concepts;
-	select2Data["matcher"] = va_matcher; //TODO
+	select2Data["matcher"] = tt_matcher;
 	
 	jQuery("select:not(.conceptList, #mapSelection)").select2();
 	jQuery("#mapSelection").select2({
@@ -27,7 +32,7 @@ jQuery(function (){
 			}
 			return jQuery("<span" + colString + ">" + state.text + "</span>");
 		},
-		matcher : va_matcher, //TODO
+		matcher : tt_matcher,
 		ajax : {
 			url : ajaxurl,
 			dataType : "json",
@@ -299,7 +304,7 @@ function insertConcept (id, text){
 	}
 }
 
-function va_matcher (params, data) {
+function tt_matcher (params, data) {
     // Always return the object if there is nothing to compare
     if (jQuery.trim(params.term) === '') {
       return data;
@@ -398,21 +403,30 @@ function layout(){
 function atlasChanged(){
 	jQuery("#mapSelectionDiv").css("display", "none");
 	jQuery("#mapSelection").val("").trigger("change");
+	jQuery("#atlas_info").toggle(false);
 	
 	if(this.value == -1)
 		return;
 	
+	var atlas = this.value;
+	
 	jQuery("#mapSelectionDiv").css("display", "inline");
-		
+	
 	var data = create_ajax_data({
 		"query" : "update_grammar",
-		"atlas" : this.value
+		"atlas" : atlas
 	});
 	
 	jQuery.post(ajaxurl, data, function (response){
 		var res = JSON.parse(response);
 		parserRecord = peg.generate(res[0]);
 		parserType = peg.generate(res[1]);
+		
+		if (res[2] == 1){
+			//atlas info
+			jQuery("#atlas_info").prop("href", url + atlas + "/" + atlas + "_INFO.pdf");
+			jQuery("#atlas_info").toggle(true);
+		}
 	});
 }
 
@@ -439,7 +453,7 @@ function mapChanged (value){
 		});
 	}
 	else {
-		changeIFrame("iframeScan", Rules_File);
+		changeIFrame("iframeScan", Base_File);
 		selElement.css("background-color", "#fe7266")
 		jQuery("#input_fields").addClass("hidden_c");
 		jQuery("#informant_info").addClass("hidden_c");

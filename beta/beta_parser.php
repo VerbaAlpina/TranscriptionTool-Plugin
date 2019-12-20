@@ -70,7 +70,7 @@ class BetaParser {
 			}
 			
 			if($res['str'] !== $input){
-				return ['String not valid after: ' . $res['str'], false];
+				return ['String not valid after: ' . htmlentities($res['str']), false];
 			}
 		}
 		catch (Exception $e){

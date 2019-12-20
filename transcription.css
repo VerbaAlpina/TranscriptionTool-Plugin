@@ -134,3 +134,13 @@ table.ruleTable {
 #informant_filter_screen input {
 	margin: 10px;
 }
+
+#atlas_info {
+	display: none;
+	cursor: pointer;
+	text-decoration: none;
+}
+
+#atlas_info span {
+	line-height: 1.4em;
+}

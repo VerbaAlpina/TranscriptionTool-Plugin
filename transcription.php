@@ -125,7 +125,7 @@ class TranscriptionTool {
 		if (isset($_REQUEST['onlytable']) && $_REQUEST['onlytable']){
 			wp_enqueue_style('tt_style', plugins_url('', __FILE__) . '/transcription.css');
 			echo '<div id="iframeCodepageDiv" style="width: 100%; height: 100%;">';
-			self::print_rule_table();
+			self::print_rule_table(true);
 			echo '</div>';
 			return;
 		}
@@ -187,13 +187,23 @@ class TranscriptionTool {
 		}
 		wp_localize_script('tt_script', 'SpecialValues', $special_vals);
 		
-		$rulesFile = 'rules_en.html';
+		$rulesBase = 'rules_base.html';
+		
 		$lang = substr(get_user_locale(), 0, 2);
-		if (file_exists(dirname(__FILE__) . '/rules_' . $lang . '.html')){
-			$rulesFile = 'rules_' . $lang . '.html';
+		$transl_content = apply_filters('tt_get_rules_text', false, $lang);
+		
+		if ($transl_content === false){
+			$rulesFile = 'rules_en.html';
+			
+			if (file_exists(dirname(__FILE__) . '/rules_' . $lang . '.html')){
+				$rulesFile = 'rules_' . $lang . '.html';
+			}
+			
+			$transl_content = file_get_contents(dirname(__FILE__) . '/' . $rulesFile);
 		}
 		
-		wp_localize_script('tt_script', 'Rules_File', $folder . $rulesFile);
+		wp_localize_script('tt_script', 'Base_File', $folder . $rulesBase);
+		wp_localize_script('tt_script', 'Rules', $transl_content);
 		
 		$url_data = [];
 		
@@ -214,11 +224,11 @@ class TranscriptionTool {
 		?>
 
 		<div id="iframeScanDiv">
-			<iframe src="<?php echo $folder . $rulesFile?>" id="iframeScan"></iframe>
+			<iframe src="<?php echo $folder . $rulesBase?>" id="iframeScan"></iframe>
 		</div>
 		<div id="iframeCodepageDiv">
 			
-			<?php self::print_rule_table(); ?>
+			<?php self::print_rule_table(true); ?>
 			
 			<br />
 			<br />
@@ -226,7 +236,8 @@ class TranscriptionTool {
 			<br />
 			
 			<?php 
-			echo file_get_contents(dirname(__FILE__) . '/' . $rulesFile);
+			$base = file_get_contents(dirname(__FILE__) . '/' . $rulesBase);
+			echo str_replace('###CONTENT###', $transl_content, $base);
 			?>
 		</div>
 		<div id="enterTranscription">
@@ -240,6 +251,8 @@ class TranscriptionTool {
 				}
 				?>
 			</select>
+			
+			<a href="" target="_BLANK" id="atlas_info"><span class="dashicons dashicons-paperclip"></span></a>
 			
 			<div id="mapSelectionDiv">
 				<select id="mapSelection">
@@ -344,8 +357,8 @@ class TranscriptionTool {
 			echo self::info_symbol($help);
 	}
 	
-	private static function print_rule_table (){
-		
+	public static function print_rule_table ($colored = true){
+		//error_log(json_encode(self::$mappings));
 		$select_sql = 'SELECT t.#Beta#A#, t.#Beta_Example#A#, t.#Position#A#, t.#Description#A#, t.#Comment#A#, t.#Depiction#A# FROM #transcription_rules# t ';
 		
 		$tmapping = self::$mappings['transcription_rules'];
@@ -402,7 +415,7 @@ class TranscriptionTool {
 						}
 						
 						echo '<tr style="background: ' 
-							. self::type_to_bg($char['Position']) 
+							. ($colored? self::type_to_bg($char['Position']) : 'white')
 							. '"><td class="imageTranscriptionRule"><div>' 
 							. $img . '</div></td><td>' . $char['Description'] . '</td><td class="betaTranscriptionRule">' 
 							. htmlentities($char['Beta']) . '</td><td>'
@@ -528,9 +541,6 @@ class TranscriptionTool {
 		}
 		
 		if(current_user_can(self::$cap_read)){
-		
-			global $admin;
-			global $va_mitarbeiter;
 			
 			switch ($_REQUEST['query']){
 				case 'update_informant':
@@ -544,7 +554,10 @@ class TranscriptionTool {
 						self::$mappings['codepage_original']->get_table_name(), 
 						$_POST['atlas']);
 					
-					echo json_encode([$parser->build_js_grammar_string(['COMMENTS']), ($parser->build_js_grammar_string(['UPPERCASE', 'COMMENTS']))]);
+					$info_file = get_home_path() . self::$document_path . $_POST['atlas'] . '/' . $_POST['atlas'] . '_INFO.pdf';
+					$info = file_exists($info_file)? 1: 0;
+					
+					echo json_encode([$parser->build_js_grammar_string(['COMMENTS']), ($parser->build_js_grammar_string(['UPPERCASE', 'COMMENTS'])), $info]);
 					break;
 				
 				case 'get_map_list':
@@ -566,6 +579,7 @@ class TranscriptionTool {
 							$backgroundcolor="#80FF80";
 						}
 						else {
+							$scan = NULL;
 							$backgroundcolor="#fe7266";
 						}
 						$nameMap = $row['Source'] . '#' . str_pad($row['Map_Number'], 4, '0', STR_PAD_LEFT) . '_' . $row['Sub_Number'] . ' (' . $row['Stimulus'] . ')';
@@ -832,6 +846,8 @@ class TranscriptionTool {
 		$atlas = remove_accents($atlas);
 		$scan_dir = get_home_path() . self::$document_path . $atlas . '/';
 		
+		$listing = [];
+		
 		if ($handle = opendir($scan_dir)) {
 			while (false !== ($file = readdir($handle))) {
 
@@ -878,12 +894,14 @@ class TranscriptionTool {
 		}
 		
 		$ifilter = '';
-		foreach ($filters as $filter){
-			if ($filter[2] == '%s'){
-				$ifilter .= ' AND ' . stripslashes($filter[0]) . ' = "' . esc_sql(stripslashes($filter[1])) . '"' . "\n";
-			}
-			else {
-				$ifilter .= ' AND i.#' . stripslashes($filter[0]) . '# = ' . esc_sql(stripslashes($filter[1])) . "\n";
+		if ($filters){
+			foreach ($filters as $filter){
+				if ($filter[2] == '%s'){
+					$ifilter .= ' AND ' . stripslashes($filter[0]) . ' = "' . esc_sql(stripslashes($filter[1])) . '"' . "\n";
+				}
+				else {
+					$ifilter .= ' AND i.#' . stripslashes($filter[0]) . '# = ' . esc_sql(stripslashes($filter[1])) . "\n";
+				}
 			}
 		}
 		

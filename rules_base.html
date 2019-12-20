@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+
+<head>
+<meta charset="UTF-8" />
+</head>
+
+<style type="text/css">
+body {
+	background: white;
+}
+
+div#content {
+	max-width: 800px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+div#iframeCodepageDiv div#content {
+	margin: 10px;
+}
+
+.rulesTable {
+	border: 1px solid black;
+	border-collapse: collapse;
+	margin-top: 20px;
+	margin-bottom: 20px;
+}
+.rulesTable thead tr {
+	border-bottom: 1px solid black;
+}
+
+.rulesTable th, .rulesTable td {
+	border-right: 1px solid black;
+	padding: 5px;
+}
+</style>
+
+<div id="content">
+
+###CONTENT###
+
+</div>
+
+<script type="text/javascript">
+	window.onload = function (){
+   		parent.loadContent();
+	}
+</script>
