@@ -207,6 +207,7 @@ class BetaParser {
 				}
 				else if (!in_array($char, $missing)){
 					$missing[] = $char;
+					do_action('tt_missing_original_char', $char);
 				}
 			}
 		}
@@ -253,7 +254,7 @@ class BetaParser {
 			//Look for vowels with accents
 			foreach ($this->accents as $accent) {
 				$acc_quoted = preg_quote($accent[0], '/');
-				$char = preg_replace_callback('/([' . $vowels_str . '][^' . $acc_quoted . 'a-zA-Z]*)' . $acc_quoted . '/',
+				$char = preg_replace_callback('/([' . $vowels_str . '][^' . $acc_quoted . 'a-zA-Z]*)' . $acc_quoted . '(?![0-9])/',
 					function ($matches) use (&$result, $accent, &$accent_explicit){
 						$result .= $accent[1]; //Add ipa accent before vowel
 						$accent_explicit = true; //Explicit accent found => no accent has to be added
@@ -322,7 +323,7 @@ class BetaParser {
 						$this->currentDiacritics[] = $element;
 					}
 				}
-				else if (count($element) == 0){
+				else if (!$element || count($element) == 0){
 					//Skip
 				}
 				else if (isset($element['str']) && isset($element['arr'])) { //Just result array => pass through

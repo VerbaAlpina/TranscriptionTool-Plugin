@@ -23,7 +23,7 @@ class Tokenizer {
 			}
 			else { //Longest separators first, in case they are starting with the same characters
 				usort($level, function ($val1, $val2){
-					count($val1) < count($val2);
+					mb_strlen($val1) < mb_strlen($val2);
 				});
 			}
 		}

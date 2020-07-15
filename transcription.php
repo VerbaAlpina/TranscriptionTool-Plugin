@@ -588,6 +588,34 @@ class TranscriptionTool {
 					echo json_encode(['results' => $options]);
 				break;
 				
+				case 'get_map_list_all':
+				    $sql = self::create_query('SELECT s.#Id_Stimulus#A#, s.#Source#A#, s.#Map_Number#A#, s.#Sub_Number#A#, left(s.#Stimulus#, 50) as Stimulus
+							FROM #stimuli# s
+							WHERE s.#Source# = %s
+							ORDER BY special_cast(s.#Map_Number#)', [$_REQUEST['atlas']]);
+				    
+				    $scans = self::list_scan_dir($_REQUEST['atlas']);
+				    
+				    $result = self::$db->get_results($sql, ARRAY_A);
+				    $options = [];
+				    foreach($result as $row) {
+				        if(isset($scans[$row['Map_Number']])) {
+				            $scan = $scans[$row['Map_Number']];
+				            $backgroundcolor="#80FF80";
+				        }
+				        else {
+				            $scan = NULL;
+				            $backgroundcolor="#fe7266";
+				        }
+				        $nameMap = $row['Source'] . '#' . str_pad($row['Map_Number'], 4, '0', STR_PAD_LEFT) . '_' . $row['Sub_Number'] . ' (' . $row['Stimulus'] . ')';
+				        $options[] = ['id' => $row['Id_Stimulus'] .  ($scan? '|' . $scan : ''), 'text' => $nameMap, 'color' => $backgroundcolor];
+				        if (!$scan){
+				            echo $row['Id_Stimulus'] . ', ' . $row['Map_Number'] . ', ' . $row['Stimulus'] . "\n";
+				        }
+				    }
+				    //echo json_encode(['results' => $options]);
+				    break;
+				
 				case 'get_new_row':
 					if(!current_user_can(self::$cap_write))
 						break;
