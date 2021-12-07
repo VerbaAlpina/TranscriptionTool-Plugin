@@ -138,7 +138,7 @@ jQuery(function (){
     	}, selectModes.Select2);
     });
     
-    addNewEnumValueScript ("#newConceptDialog select", selectModes.Select2);
+    //addNewEnumValueScript ("#newConceptDialog select", selectModes.Select2);
     
     jQuery(document).on("keyup paste", ".inputStatement", updateOriginal);
     

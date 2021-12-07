@@ -141,8 +141,8 @@ class TranscriptionTool {
 		
 		$folder = plugins_url('', __FILE__) . '/';
 		
-		wp_enqueue_script('tt_script', $folder . 'transcription.js?v=1', [], false, true);
-		wp_enqueue_style('tt_style', $folder . 'transcription.css');
+		wp_enqueue_script('tt_script', $folder . 'transcription.js?v=2', [], false, true);
+		wp_enqueue_style('tt_style', $folder . 'transcription.css?v=1');
 		
 		wp_enqueue_script('tt_qtip', $folder . 'lib/qtip/jquery.qtip.min.js', ['jquery']);
 		wp_enqueue_style('tt_qtip_style', $folder . 'lib/qtip/jquery.qtip.min.css');

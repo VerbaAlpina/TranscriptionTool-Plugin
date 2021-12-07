@@ -23,7 +23,7 @@ class Tokenizer {
 			}
 			else { //Longest separators first, in case they are starting with the same characters
 				usort($level, function ($val1, $val2){
-					mb_strlen($val1) < mb_strlen($val2);
+				    mb_strlen($val1) < mb_strlen($val2);
 				});
 			}
 		}
@@ -143,8 +143,8 @@ class Tokenizer {
 		}
 		
 		if (self::DEBUG){
-			echo 'Copy areas: ' . va_add_marking_spans($record, $this->ignore_areas_copy) . '<br>';
-			echo 'Escape areas: ' . va_add_marking_spans($record, $this->ignore_areas_escape) . '<br>';
+		    echo 'Copy areas: ' . va_add_marking_spans($record, $this->ignore_areas_copy) . ' --- ' . json_encode($this->ignore_areas_copy) .  '<br>';
+		    echo 'Escape areas: ' . va_add_marking_spans($record, $this->ignore_areas_escape). ' --- ' . json_encode($this->ignore_areas_escape) . '<br>';
 		}
 		
 		return $record;
@@ -231,10 +231,10 @@ class Tokenizer {
 			}
 			
 			if(!mb_check_encoding($char, 'ASCII')){
-				$offset++;
-				$offsetIncrease++;
+				$offset += strlen($char) - 1;
+				$offsetIncrease += strlen($char) - 1;
 				if (self::DEBUG){
-					echo 'Non ASCII char => increase offset <br />';
+				    echo 'Non ASCII char => increase offset by ' . (strlen($char) - 1) . ' <br />';
 				}
 			}
 			
@@ -280,7 +280,7 @@ class Tokenizer {
 	
 					$currentCFieldContent .= $char;
 					if (self::DEBUG){
-						echo 'Char in copy interval<br />';
+					    echo 'Char in copy interval (Current copy string: ' . htmlentities($currentCFieldContent) . ')<br />';
 					}
 				}
 				else {

@@ -69,6 +69,10 @@ class BetaParser {
 				$this->reset_parser();
 			}
 			
+			if (!$res){
+			    return ['String not valid: ' . $input, false];
+			}
+			
 			if($res['str'] !== $input){
 				return ['String not valid after: ' . htmlentities($res['str']), false];
 			}
